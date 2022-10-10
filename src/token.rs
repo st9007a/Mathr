@@ -31,7 +31,8 @@ pub enum BinaryOpType {
 pub enum Token {
     Integer(u32),
     BinaryOp(BinaryOpType),
-    EOF,
+    ParentheseStart,
+    ParentheseEnd,
 }
 
 pub struct Tokenizer {
@@ -49,7 +50,35 @@ impl Tokenizer {
         }
     }
 
-    fn make_integer(&mut self) -> Result<Token, InvalidTokenError> {
+    pub fn step(&mut self) -> Result<Token, InvalidTokenError> {
+        self.skip_whitespace();
+
+        if self.ptr == self.charvec.len() {
+            return Err(InvalidTokenError::new());
+        }
+
+        let ch = self.charvec[self.ptr];
+
+        if ch.is_numeric() {
+            self.consume_integer()
+        } else if ch == '+' || ch == '-' || ch == '*' || ch == '/' {
+            self.consume_binary_op()
+        } else if ch == '(' {
+            self.ptr += 1;
+            Ok(Token::ParentheseStart)
+        } else if ch == ')' {
+            self.ptr += 1;
+            Ok(Token::ParentheseEnd)
+        } else {
+            Err(InvalidTokenError::new())
+        }
+    }
+
+    pub fn into_iter(self) -> TokenIterator {
+        TokenIterator(self)
+    }
+
+    fn consume_integer(&mut self) -> Result<Token, InvalidTokenError> {
         let mut cur = String::new();
         while self.ptr < self.charvec.len() && self.charvec[self.ptr].is_numeric() {
             cur.push(self.charvec[self.ptr]);
@@ -61,7 +90,7 @@ impl Tokenizer {
             .map_err(|_| InvalidTokenError::new())
     }
 
-    fn make_binary_op(&mut self) -> Result<Token, InvalidTokenError> {
+    fn consume_binary_op(&mut self) -> Result<Token, InvalidTokenError> {
         let ch = self.charvec[self.ptr];
 
         self.ptr += 1;
@@ -79,28 +108,6 @@ impl Tokenizer {
         while self.ptr < self.charvec.len() && self.charvec[self.ptr] == ' ' {
             self.ptr += 1
         }
-    }
-
-    pub fn step(&mut self) -> Result<Token, InvalidTokenError> {
-        self.skip_whitespace();
-
-        if self.ptr == self.charvec.len() {
-            return Err(InvalidTokenError::new());
-        }
-
-        let ch = self.charvec[self.ptr];
-
-        if ch.is_numeric() {
-            self.make_integer()
-        } else if ch == '+' || ch == '-' || ch == '*' || ch == '/' {
-            self.make_binary_op()
-        } else {
-            Err(InvalidTokenError::new())
-        }
-    }
-
-    pub fn into_iter(self) -> TokenIterator {
-        TokenIterator(self)
     }
 }
 

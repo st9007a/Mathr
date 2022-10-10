@@ -19,7 +19,7 @@ fn main() -> io::Result<()> {
     //     println!("{}", buffer);
     // }
 
-    let tokenizer = Tokenizer::new("1 +    2");
+    let tokenizer = Tokenizer::new("1 +    2 / (53 + 1122)");
 
     for token in tokenizer {
         println!("{:?}", token);
