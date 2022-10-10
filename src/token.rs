@@ -61,16 +61,18 @@ impl Tokenizer {
 
         if ch.is_numeric() {
             self.consume_integer()
-        } else if ch == '+' || ch == '-' || ch == '*' || ch == '/' {
-            self.consume_binary_op()
-        } else if ch == '(' {
-            self.ptr += 1;
-            Ok(Token::ParentheseStart)
-        } else if ch == ')' {
-            self.ptr += 1;
-            Ok(Token::ParentheseEnd)
         } else {
-            Err(InvalidTokenError::new())
+            self.ptr += 1;
+
+            match ch {
+                '+' => Ok(Token::BinaryOp(BinaryOpType::Add)),
+                '-' => Ok(Token::BinaryOp(BinaryOpType::Sub)),
+                '*' => Ok(Token::BinaryOp(BinaryOpType::Mul)),
+                '/' => Ok(Token::BinaryOp(BinaryOpType::Div)),
+                '(' => Ok(Token::ParentheseStart),
+                ')' => Ok(Token::ParentheseEnd),
+                _ => Err(InvalidTokenError::new()),
+            }
         }
     }
 
@@ -88,20 +90,6 @@ impl Tokenizer {
         cur.parse::<u32>()
             .map(|num| Token::Integer(num))
             .map_err(|_| InvalidTokenError::new())
-    }
-
-    fn consume_binary_op(&mut self) -> Result<Token, InvalidTokenError> {
-        let ch = self.charvec[self.ptr];
-
-        self.ptr += 1;
-
-        match ch {
-            '+' => Ok(Token::BinaryOp(BinaryOpType::Add)),
-            '-' => Ok(Token::BinaryOp(BinaryOpType::Sub)),
-            '*' => Ok(Token::BinaryOp(BinaryOpType::Mul)),
-            '/' => Ok(Token::BinaryOp(BinaryOpType::Div)),
-            _ => Err(InvalidTokenError::new()),
-        }
     }
 
     fn skip_whitespace(&mut self) {
