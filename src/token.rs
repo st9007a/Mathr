@@ -39,6 +39,8 @@ pub struct Tokenizer {
     ptr: usize,
 }
 
+pub struct TokenIterator(Tokenizer);
+
 impl Tokenizer {
     pub fn new(text: &str) -> Self {
         Self {
@@ -83,7 +85,7 @@ impl Tokenizer {
         self.skip_whitespace();
 
         if self.ptr == self.charvec.len() {
-            return Ok(Token::EOF);
+            return Err(InvalidTokenError::new());
         }
 
         let ch = self.charvec[self.ptr];
@@ -96,12 +98,25 @@ impl Tokenizer {
             Err(InvalidTokenError::new())
         }
     }
+
+    pub fn into_iter(self) -> TokenIterator {
+        TokenIterator(self)
+    }
 }
 
-impl Iterator for Tokenizer {
+impl Iterator for TokenIterator {
     type Item = Token;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.step().ok()
+        self.0.step().ok()
+    }
+}
+
+impl IntoIterator for Tokenizer {
+    type Item = Token;
+    type IntoIter = TokenIterator;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.into_iter()
     }
 }

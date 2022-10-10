@@ -20,13 +20,9 @@ fn main() -> io::Result<()> {
     // }
 
     let tokenizer = Tokenizer::new("1 +    2");
-    let mut iter = tokenizer.into_iter();
 
-    for _ in 0..3 {
-        match iter.next() {
-            Some(token) => println!("{:?}", token),
-            None => println!("None"),
-        }
+    for token in tokenizer {
+        println!("{:?}", token);
     }
 
     Ok(())
