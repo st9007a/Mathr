@@ -1,3 +1,5 @@
+pub mod ast;
+
 use std::io;
 use std::io::Write;
 

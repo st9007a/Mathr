@@ -1,3 +1,3 @@
-mod ast;
-mod bin;
-mod int;
+pub mod add;
+pub mod ast;
+pub mod int;
