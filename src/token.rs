@@ -1,23 +1,5 @@
-use std::error;
-use std::fmt;
+use crate::error::InvalidTokenError;
 use std::result::Result;
-
-#[derive(Debug)]
-pub struct InvalidTokenError;
-
-impl InvalidTokenError {
-    pub fn new() -> Self {
-        Self {}
-    }
-}
-
-impl error::Error for InvalidTokenError {}
-
-impl fmt::Display for InvalidTokenError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "invalid token")
-    }
-}
 
 #[derive(Debug)]
 pub enum BinaryOpType {
