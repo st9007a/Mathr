@@ -1,7 +1,7 @@
 use crate::error::InvalidSyntaxError;
 use std::result::Result;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum BinaryOpType {
     Add,
     Sub,
@@ -9,7 +9,7 @@ pub enum BinaryOpType {
     Div,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Token {
     Integer(u32),
     BinaryOp(BinaryOpType),
@@ -38,11 +38,6 @@ impl Tokenizer {
         self.skip_whitespace();
 
         if self.ptr == self.charvec.len() {
-            self.ptr += 1;
-            return Ok(Token::EOF);
-        }
-
-        if self.ptr == self.charvec.len() + 1 {
             return Err(InvalidSyntaxError::new("eof".to_string()));
         }
 
@@ -103,5 +98,58 @@ impl IntoIterator for Tokenizer {
 
     fn into_iter(self) -> Self::IntoIter {
         self.into_iter()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{BinaryOpType, Token, Tokenizer};
+
+    #[test]
+    fn test_step() {
+        let mut tokenizer = Tokenizer::new("1 + 2*(510   - 33 )  / 7 ");
+
+        assert_eq!(tokenizer.step().ok(), Some(Token::Integer(1)));
+        assert_eq!(
+            tokenizer.step().ok(),
+            Some(Token::BinaryOp(BinaryOpType::Add))
+        );
+        assert_eq!(tokenizer.step().ok(), Some(Token::Integer(2)));
+        assert_eq!(
+            tokenizer.step().ok(),
+            Some(Token::BinaryOp(BinaryOpType::Mul))
+        );
+        assert_eq!(tokenizer.step().ok(), Some(Token::ParentheseStart));
+        assert_eq!(tokenizer.step().ok(), Some(Token::Integer(510)));
+        assert_eq!(
+            tokenizer.step().ok(),
+            Some(Token::BinaryOp(BinaryOpType::Sub))
+        );
+        assert_eq!(tokenizer.step().ok(), Some(Token::Integer(33)));
+        assert_eq!(tokenizer.step().ok(), Some(Token::ParentheseEnd));
+        assert_eq!(
+            tokenizer.step().ok(),
+            Some(Token::BinaryOp(BinaryOpType::Div))
+        );
+        assert_eq!(tokenizer.step().ok(), Some(Token::Integer(7)));
+        assert_eq!(tokenizer.step().ok(), None);
+    }
+
+    #[test]
+    fn test_into_iter() {
+        let mut tokenizer = Tokenizer::new("1 + 2*(510   - 33 )  / 7 ").into_iter();
+
+        assert_eq!(tokenizer.next(), Some(Token::Integer(1)));
+        assert_eq!(tokenizer.next(), Some(Token::BinaryOp(BinaryOpType::Add)));
+        assert_eq!(tokenizer.next(), Some(Token::Integer(2)));
+        assert_eq!(tokenizer.next(), Some(Token::BinaryOp(BinaryOpType::Mul)));
+        assert_eq!(tokenizer.next(), Some(Token::ParentheseStart));
+        assert_eq!(tokenizer.next(), Some(Token::Integer(510)));
+        assert_eq!(tokenizer.next(), Some(Token::BinaryOp(BinaryOpType::Sub)));
+        assert_eq!(tokenizer.next(), Some(Token::Integer(33)));
+        assert_eq!(tokenizer.next(), Some(Token::ParentheseEnd));
+        assert_eq!(tokenizer.next(), Some(Token::BinaryOp(BinaryOpType::Div)));
+        assert_eq!(tokenizer.next(), Some(Token::Integer(7)));
+        assert_eq!(tokenizer.next(), None);
     }
 }
