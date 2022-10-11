@@ -16,8 +16,6 @@ pub enum Token {
     ParentheseStart,
     ParentheseEnd,
     Comma,
-    BuiltinCall(String),
-    BuiltinSymbol(String),
     EOF,
 }
 
