@@ -53,7 +53,7 @@ impl Parser {
                 _ => Err(UnexpectedTokenError::new(token)),
             }
         } else {
-            Err(UnexpectedTokenError::new(Token::EOF))
+            Ok(left)
         }
     }
 
@@ -70,7 +70,7 @@ impl Parser {
                 _ => Err(UnexpectedTokenError::new(token)),
             }
         } else {
-            Err(UnexpectedTokenError::new(Token::EOF))
+            Ok(left)
         }
     }
 }
