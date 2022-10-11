@@ -33,6 +33,9 @@ pub enum Token {
     BinaryOp(BinaryOpType),
     ParentheseStart,
     ParentheseEnd,
+    Comma,
+    BuiltinCall(String),
+    BuiltinSymbol(String),
 }
 
 pub struct Tokenizer {
@@ -71,6 +74,7 @@ impl Tokenizer {
                 '/' => Ok(Token::BinaryOp(BinaryOpType::Div)),
                 '(' => Ok(Token::ParentheseStart),
                 ')' => Ok(Token::ParentheseEnd),
+                ',' => Ok(Token::Comma),
                 _ => Err(InvalidTokenError::new()),
             }
         }
