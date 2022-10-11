@@ -1,19 +1,42 @@
 use std::error;
 use std::fmt;
 
-#[derive(Debug)]
-pub struct InvalidTokenError;
+use crate::token::Token;
 
-impl InvalidTokenError {
-    pub fn new() -> Self {
-        Self {}
+#[derive(Debug)]
+pub struct InvalidSyntaxError {
+    content: String,
+}
+
+impl InvalidSyntaxError {
+    pub fn new(content: String) -> Self {
+        Self { content }
     }
 }
 
-impl error::Error for InvalidTokenError {}
+impl error::Error for InvalidSyntaxError {}
 
-impl fmt::Display for InvalidTokenError {
+impl fmt::Display for InvalidSyntaxError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "invalid token")
+        write!(f, "invalid syntax: {}", self.content)
+    }
+}
+
+#[derive(Debug)]
+pub struct UnexpectedTokenError {
+    token: Token,
+}
+
+impl UnexpectedTokenError {
+    pub fn new(token: Token) -> Self {
+        Self { token }
+    }
+}
+
+impl error::Error for UnexpectedTokenError {}
+
+impl fmt::Display for UnexpectedTokenError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Unexpected token: {:?}", self.token)
     }
 }

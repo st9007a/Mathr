@@ -1,4 +1,4 @@
-use crate::error::InvalidTokenError;
+use crate::error::InvalidSyntaxError;
 use std::result::Result;
 
 #[derive(Debug)]
@@ -18,6 +18,7 @@ pub enum Token {
     Comma,
     BuiltinCall(String),
     BuiltinSymbol(String),
+    EOF,
 }
 
 pub struct Tokenizer {
@@ -35,11 +36,16 @@ impl Tokenizer {
         }
     }
 
-    pub fn step(&mut self) -> Result<Token, InvalidTokenError> {
+    pub fn step(&mut self) -> Result<Token, InvalidSyntaxError> {
         self.skip_whitespace();
 
         if self.ptr == self.charvec.len() {
-            return Err(InvalidTokenError::new());
+            self.ptr += 1;
+            return Ok(Token::EOF);
+        }
+
+        if self.ptr == self.charvec.len() + 1 {
+            return Err(InvalidSyntaxError::new("eof".to_string()));
         }
 
         let ch = self.charvec[self.ptr];
@@ -57,7 +63,7 @@ impl Tokenizer {
                 '(' => Ok(Token::ParentheseStart),
                 ')' => Ok(Token::ParentheseEnd),
                 ',' => Ok(Token::Comma),
-                _ => Err(InvalidTokenError::new()),
+                _ => Err(InvalidSyntaxError::new(ch.to_string())),
             }
         }
     }
@@ -66,7 +72,7 @@ impl Tokenizer {
         TokenIterator(self)
     }
 
-    fn consume_integer(&mut self) -> Result<Token, InvalidTokenError> {
+    fn consume_integer(&mut self) -> Result<Token, InvalidSyntaxError> {
         let mut cur = String::new();
         while self.ptr < self.charvec.len() && self.charvec[self.ptr].is_numeric() {
             cur.push(self.charvec[self.ptr]);
@@ -75,7 +81,7 @@ impl Tokenizer {
 
         cur.parse::<u32>()
             .map(|num| Token::Integer(num))
-            .map_err(|_| InvalidTokenError::new())
+            .map_err(|_| InvalidSyntaxError::new(cur))
     }
 
     fn skip_whitespace(&mut self) {
