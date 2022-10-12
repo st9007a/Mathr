@@ -19,6 +19,10 @@ impl Parser {
         self.expr()
     }
 
+    fn peek_next_token(&mut self) -> Option<&Token> {
+        self.token_iter.peek()
+    }
+
     fn get_next_token(&mut self) -> Option<Token> {
         self.token_iter.next()
     }
@@ -33,7 +37,7 @@ impl Parser {
                     self.get_next_token()
                         .ok_or(UnexpectedTokenError::new(Token::EOF))
                         .and_then(move |next_token| match next_token {
-                            Token::ParentheseStart => Ok(node),
+                            Token::ParentheseEnd => Ok(node),
                             _ => Err(UnexpectedTokenError::new(next_token)),
                         })
                 }
@@ -47,14 +51,20 @@ impl Parser {
     fn term(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
         let left = self.factor()?;
 
-        if let Some(token) = self.get_next_token() {
+        if let Some(token) = self.peek_next_token() {
             match token {
                 Token::BinaryOp(ref op_type) => match op_type {
-                    BinaryOpType::Mul => Ok(Box::new(MulNode::new(left, self.factor()?))),
-                    BinaryOpType::Div => Ok(Box::new(DivNode::new(left, self.factor()?))),
-                    _ => Err(UnexpectedTokenError::new(token)),
+                    BinaryOpType::Mul => {
+                        self.get_next_token();
+                        Ok(Box::new(MulNode::new(left, self.factor()?)))
+                    }
+                    BinaryOpType::Div => {
+                        self.get_next_token();
+                        Ok(Box::new(DivNode::new(left, self.factor()?)))
+                    }
+                    _ => Ok(left),
                 },
-                _ => Err(UnexpectedTokenError::new(token)),
+                _ => Ok(left),
             }
         } else {
             Ok(left)
@@ -64,14 +74,20 @@ impl Parser {
     fn expr(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
         let left = self.term()?;
 
-        if let Some(token) = self.get_next_token() {
+        if let Some(token) = self.peek_next_token() {
             match token {
                 Token::BinaryOp(ref op_type) => match op_type {
-                    BinaryOpType::Add => Ok(Box::new(AddNode::new(left, self.term()?))),
-                    BinaryOpType::Sub => Ok(Box::new(SubNode::new(left, self.term()?))),
-                    _ => Err(UnexpectedTokenError::new(token)),
+                    BinaryOpType::Add => {
+                        self.get_next_token();
+                        Ok(Box::new(AddNode::new(left, self.term()?)))
+                    }
+                    BinaryOpType::Sub => {
+                        self.get_next_token();
+                        Ok(Box::new(SubNode::new(left, self.term()?)))
+                    }
+                    _ => Ok(left),
                 },
-                _ => Err(UnexpectedTokenError::new(token)),
+                _ => Ok(left),
             }
         } else {
             Ok(left)
@@ -115,10 +131,7 @@ mod tests {
         let mut parser = Parser::from_text(" ( 12 + 21)");
         let node = parser.parse();
 
-        println!("{:?}", node.err());
-        assert!(false);
-
-        // assert!(node.is_ok());
-        // assert_eq!(node.unwrap().eval(), 33);
+        assert!(node.is_ok());
+        assert_eq!(node.unwrap().eval(), 33);
     }
 }

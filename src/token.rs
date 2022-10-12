@@ -1,5 +1,6 @@
-use crate::error::InvalidSyntaxError;
 use std::result::Result;
+
+use crate::error::InvalidSyntaxError;
 
 #[derive(Debug, PartialEq)]
 pub enum BinaryOpType {
