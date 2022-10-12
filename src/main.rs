@@ -4,30 +4,25 @@ pub mod parser;
 pub mod token;
 
 use std::io;
+use std::io::Write;
 
 use parser::Parser;
-use token::{Token, Tokenizer};
-// use std::io::Write;
 
 fn main() -> io::Result<()> {
-    // loop {
-    //     let mut buffer = String::new();
-    //
-    //     print!(">>> ");
-    //     io::stdout().flush()?;
-    //     io::stdin().read_line(&mut buffer)?;
-    //
-    //     buffer.pop();
-    //
-    //     println!("{}", buffer);
-    // }
+    loop {
+        let mut buffer = String::new();
 
-    let _tokens: Vec<Token> = Tokenizer::new("1 + 2").into_iter().collect();
+        print!(">>> ");
+        io::stdout().flush()?;
+        io::stdin().read_line(&mut buffer)?;
 
-    let mut parser = Parser::from_text("11 * (2 + 3)");
-    let val = parser.parse().unwrap().eval();
+        buffer.pop();
 
-    println!("{}", val);
+        let mut parser = Parser::from_text(&buffer);
 
-    Ok(())
+        match parser.parse() {
+            Ok(node) => println!("{}", node.eval()),
+            Err(err) => println!("{}", err),
+        }
+    }
 }
