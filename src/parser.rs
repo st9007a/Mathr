@@ -30,16 +30,16 @@ impl Parser {
     fn factor(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
         if let Some(token) = self.get_next_token() {
             match token {
-                Token::Number(value) => Ok(Box::new(IntegerNode::new(value))),
-                Token::Add => Ok(Box::new(PosNode::new(self.factor()?))),
-                Token::Sub => Ok(Box::new(NegNode::new(self.factor()?))),
-                Token::ParentheseStart => {
+                Token::INTEGER(value) => Ok(Box::new(IntegerNode::new(value))),
+                Token::PLUS => Ok(Box::new(PosNode::new(self.factor()?))),
+                Token::MINUS => Ok(Box::new(NegNode::new(self.factor()?))),
+                Token::LPAREN => {
                     let node = self.expr()?;
 
                     self.get_next_token()
                         .ok_or(UnexpectedTokenError::new(Token::EOF))
                         .and_then(move |next_token| match next_token {
-                            Token::ParentheseEnd => Ok(node),
+                            Token::RPAREN => Ok(node),
                             _ => Err(UnexpectedTokenError::new(next_token)),
                         })
                 }
@@ -55,11 +55,11 @@ impl Parser {
 
         while let Some(token) = self.peek_next_token() {
             match token {
-                Token::Mul => {
+                Token::MUL => {
                     self.get_next_token();
                     left = Box::new(MulNode::new(left, self.factor()?));
                 }
-                Token::Div => {
+                Token::DIV => {
                     self.get_next_token();
                     left = Box::new(DivNode::new(left, self.factor()?));
                 }
@@ -77,11 +77,11 @@ impl Parser {
 
         while let Some(token) = self.peek_next_token() {
             match token {
-                Token::Add => {
+                Token::PLUS => {
                     self.get_next_token();
                     left = Box::new(AddNode::new(left, self.term()?));
                 }
-                Token::Sub => {
+                Token::MINUS => {
                     self.get_next_token();
                     left = Box::new(SubNode::new(left, self.term()?));
                 }
