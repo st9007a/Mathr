@@ -12,7 +12,7 @@ pub enum BinaryOpType {
 
 #[derive(Debug, PartialEq)]
 pub enum Token {
-    Integer(u32),
+    Integer(i32),
     BinaryOp(BinaryOpType),
     ParentheseStart,
     ParentheseEnd,
@@ -73,7 +73,7 @@ impl Tokenizer {
             self.ptr += 1;
         }
 
-        cur.parse::<u32>()
+        cur.parse::<i32>()
             .map(|num| Token::Integer(num))
             .map_err(|_| InvalidSyntaxError::new(cur))
     }

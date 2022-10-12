@@ -49,49 +49,57 @@ impl Parser {
     }
 
     fn term(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
-        let left = self.factor()?;
+        let mut left = self.factor()?;
 
-        if let Some(token) = self.peek_next_token() {
+        while let Some(token) = self.peek_next_token() {
             match token {
                 Token::BinaryOp(ref op_type) => match op_type {
                     BinaryOpType::Mul => {
                         self.get_next_token();
-                        Ok(Box::new(MulNode::new(left, self.factor()?)))
+                        left = Box::new(MulNode::new(left, self.factor()?));
                     }
                     BinaryOpType::Div => {
                         self.get_next_token();
-                        Ok(Box::new(DivNode::new(left, self.factor()?)))
+                        left = Box::new(DivNode::new(left, self.factor()?));
                     }
-                    _ => Ok(left),
+                    _ => {
+                        break;
+                    }
                 },
-                _ => Ok(left),
+                _ => {
+                    break;
+                }
             }
-        } else {
-            Ok(left)
         }
+
+        Ok(left)
     }
 
     fn expr(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
-        let left = self.term()?;
+        let mut left = self.term()?;
 
-        if let Some(token) = self.peek_next_token() {
+        while let Some(token) = self.peek_next_token() {
             match token {
                 Token::BinaryOp(ref op_type) => match op_type {
                     BinaryOpType::Add => {
                         self.get_next_token();
-                        Ok(Box::new(AddNode::new(left, self.term()?)))
+                        left = Box::new(AddNode::new(left, self.term()?));
                     }
                     BinaryOpType::Sub => {
                         self.get_next_token();
-                        Ok(Box::new(SubNode::new(left, self.term()?)))
+                        left = Box::new(SubNode::new(left, self.term()?));
                     }
-                    _ => Ok(left),
+                    _ => {
+                        break;
+                    }
                 },
-                _ => Ok(left),
+                _ => {
+                    break;
+                }
             }
-        } else {
-            Ok(left)
         }
+
+        Ok(left)
     }
 }
 
@@ -133,5 +141,14 @@ mod tests {
 
         assert!(node.is_ok());
         assert_eq!(node.unwrap().eval(), 33);
+    }
+
+    #[test]
+    fn test_parse() {
+        let mut parser = Parser::from_text("1 + 2 * (3 - 4 / 2) + 10");
+        let node = parser.parse();
+
+        assert!(node.is_ok());
+        assert_eq!(node.unwrap().eval(), 13);
     }
 }

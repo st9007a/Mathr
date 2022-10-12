@@ -12,13 +12,13 @@ impl AddNode {
 }
 
 impl BinaryOpFunction for AddNode {
-    fn exec(&self, a: u32, b: u32) -> u32 {
+    fn exec(&self, a: i32, b: i32) -> i32 {
         a + b
     }
 }
 
 impl ASTNode for AddNode {
-    fn eval(&self) -> u32 {
+    fn eval(&self) -> i32 {
         self.exec(self.left.eval(), self.right.eval())
     }
 }

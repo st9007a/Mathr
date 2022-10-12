@@ -1,7 +1,7 @@
 pub trait ASTNode {
-    fn eval(&self) -> u32;
+    fn eval(&self) -> i32;
 }
 
 pub trait BinaryOpFunction {
-    fn exec(&self, a: u32, b: u32) -> u32;
+    fn exec(&self, a: i32, b: i32) -> i32;
 }
