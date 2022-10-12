@@ -6,6 +6,7 @@ pub mod token;
 use std::io;
 
 use parser::Parser;
+use token::{Token, Tokenizer};
 // use std::io::Write;
 
 fn main() -> io::Result<()> {
@@ -21,7 +22,9 @@ fn main() -> io::Result<()> {
     //     println!("{}", buffer);
     // }
 
-    let mut parser = Parser::from_text("1 * 2");
+    let _tokens: Vec<Token> = Tokenizer::new("1 + 2").into_iter().collect();
+
+    let mut parser = Parser::from_text("11 * (2 + 3)");
     let val = parser.parse().unwrap().eval();
 
     println!("{}", val);
