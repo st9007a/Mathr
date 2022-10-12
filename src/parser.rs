@@ -15,19 +15,23 @@ impl Parser {
         }
     }
 
+    pub fn from_tokenizer(tokenizer: Tokenizer) -> Self {
+        Self {
+            token_iter: tokenizer.into_iter().peekable(),
+        }
+    }
+
+    pub fn from_iter(token_iter: TokenIterator) -> Self {
+        Self {
+            token_iter: token_iter.peekable(),
+        }
+    }
+
     pub fn parse(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
         self.expr()
     }
 
-    fn peek_next_token(&mut self) -> Option<&Token> {
-        self.token_iter.peek()
-    }
-
-    fn get_next_token(&mut self) -> Option<Token> {
-        self.token_iter.next()
-    }
-
-    fn factor(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
+    pub fn factor(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
         if let Some(token) = self.get_next_token() {
             match token {
                 Token::INTEGER(value) => Ok(Box::new(IntegerNode::new(value))),
@@ -50,7 +54,7 @@ impl Parser {
         }
     }
 
-    fn term(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
+    pub fn term(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
         let mut left = self.factor()?;
 
         while let Some(token) = self.peek_next_token() {
@@ -72,7 +76,7 @@ impl Parser {
         Ok(left)
     }
 
-    fn expr(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
+    pub fn expr(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
         let mut left = self.term()?;
 
         while let Some(token) = self.peek_next_token() {
@@ -93,6 +97,14 @@ impl Parser {
 
         Ok(left)
     }
+
+    fn peek_next_token(&mut self) -> Option<&Token> {
+        self.token_iter.peek()
+    }
+
+    fn get_next_token(&mut self) -> Option<Token> {
+        self.token_iter.next()
+    }
 }
 
 #[cfg(test)]
@@ -102,7 +114,7 @@ mod tests {
     #[test]
     fn test_factor_integer() {
         let mut parser = Parser::from_text(" 123   ");
-        let node = parser.parse();
+        let node = parser.factor();
 
         assert!(node.is_ok());
         assert_eq!(node.unwrap().eval(), 123);
@@ -111,7 +123,7 @@ mod tests {
     #[test]
     fn test_term() {
         let mut parser = Parser::from_text("4 * 12");
-        let node = parser.parse();
+        let node = parser.term();
 
         assert!(node.is_ok());
         assert_eq!(node.unwrap().eval(), 48);
@@ -120,7 +132,7 @@ mod tests {
     #[test]
     fn test_expr() {
         let mut parser = Parser::from_text("4311 + 111");
-        let node = parser.parse();
+        let node = parser.expr();
 
         assert!(node.is_ok());
         assert_eq!(node.unwrap().eval(), 4422);
@@ -129,7 +141,7 @@ mod tests {
     #[test]
     fn test_factor_parenthesis() {
         let mut parser = Parser::from_text(" ( 12 + 21)");
-        let node = parser.parse();
+        let node = parser.factor();
 
         assert!(node.is_ok());
         assert_eq!(node.unwrap().eval(), 33);
@@ -138,7 +150,7 @@ mod tests {
     #[test]
     fn test_factor_unary_op() {
         let mut parser = Parser::from_text("- -   12");
-        let node = parser.parse();
+        let node = parser.factor();
 
         assert!(node.is_ok());
         assert_eq!(node.unwrap().eval(), 12);
