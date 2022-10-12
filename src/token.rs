@@ -39,32 +39,30 @@ impl Tokenizer {
     pub fn step(&mut self) -> Result<Token, InvalidSyntaxError> {
         self.skip_whitespace();
 
-        if self.ptr == self.charvec.len() {
-            return Err(InvalidSyntaxError::new("eof".to_string()));
-        }
+        if let Some(ch) = self.peek_char() {
+            if ch.is_ascii_digit() {
+                self.consume_integer()
+            } else if ch.is_ascii_alphabetic() || ch == '_' {
+                self.consume_identity()
+            } else {
+                self.next_char();
 
-        let ch = self.charvec[self.ptr];
-
-        if ch.is_ascii_digit() {
-            self.consume_integer()
-        } else if ch.is_ascii_alphabetic() || ch == '_' {
-            self.consume_identity()
-        } else {
-            self.ptr += 1;
-
-            match ch {
-                '+' => Ok(Token::PLUS),
-                '-' => Ok(Token::MINUS),
-                '*' => Ok(Token::MUL),
-                '/' => Ok(Token::DIV),
-                '(' => Ok(Token::LPAREN),
-                ')' => Ok(Token::RPAREN),
-                ',' => Ok(Token::COMMA),
-                '.' => Ok(Token::DOT),
-                '=' => Ok(Token::ASSIGN),
-                ';' => Ok(Token::SEMI),
-                _ => Err(InvalidSyntaxError::new(ch.to_string())),
+                match ch {
+                    '+' => Ok(Token::PLUS),
+                    '-' => Ok(Token::MINUS),
+                    '*' => Ok(Token::MUL),
+                    '/' => Ok(Token::DIV),
+                    '(' => Ok(Token::LPAREN),
+                    ')' => Ok(Token::RPAREN),
+                    ',' => Ok(Token::COMMA),
+                    '.' => Ok(Token::DOT),
+                    '=' => Ok(Token::ASSIGN),
+                    ';' => Ok(Token::SEMI),
+                    _ => Err(InvalidSyntaxError::new(ch.to_string())),
+                }
             }
+        } else {
+            Err(InvalidSyntaxError::new("eof".to_string()))
         }
     }
 
@@ -74,9 +72,13 @@ impl Tokenizer {
 
     fn consume_integer(&mut self) -> Result<Token, InvalidSyntaxError> {
         let mut cur = String::new();
-        while self.ptr < self.charvec.len() && self.charvec[self.ptr].is_ascii_digit() {
-            cur.push(self.charvec[self.ptr]);
-            self.ptr += 1;
+
+        while let Some(ch) = self.peek_char() {
+            if !ch.is_ascii_digit() {
+                break;
+            }
+
+            cur.push(self.next_char().unwrap());
         }
 
         cur.parse::<i32>()
@@ -87,17 +89,16 @@ impl Tokenizer {
     fn consume_identity(&mut self) -> Result<Token, InvalidSyntaxError> {
         let mut cur = String::new();
 
-        while self.ptr < self.charvec.len()
-            && (self.charvec[self.ptr].is_ascii_alphanumeric() || self.charvec[self.ptr] == '_')
-        {
-            // FIXME: This will limit variable and function naming which cannot start from e and
-            // follow a digit.
-            if cur.eq("e") && self.charvec[self.ptr].is_ascii_digit() {
+        while let Some(ch) = self.peek_char() {
+            if !ch.is_ascii_alphanumeric() && ch != '_' {
+                break;
+            }
+
+            if cur.eq("e") && ch.is_ascii_digit() {
                 return Ok(Token::E);
             }
 
-            cur.push(self.charvec[self.ptr]);
-            self.ptr += 1;
+            cur.push(self.next_char().unwrap());
         }
 
         if cur.eq("e") {
@@ -110,8 +111,30 @@ impl Tokenizer {
     }
 
     fn skip_whitespace(&mut self) {
-        while self.ptr < self.charvec.len() && self.charvec[self.ptr] == ' ' {
-            self.ptr += 1
+        while let Some(ch) = self.peek_char() {
+            if ch != ' ' {
+                break;
+            }
+            self.next_char();
+        }
+    }
+
+    fn peek_char(&self) -> Option<char> {
+        if self.ptr < self.charvec.len() {
+            Some(self.charvec[self.ptr])
+        } else {
+            None
+        }
+    }
+
+    fn next_char(&mut self) -> Option<char> {
+        if self.ptr < self.charvec.len() {
+            let ch = self.charvec[self.ptr];
+            self.ptr += 1;
+
+            Some(ch)
+        } else {
+            None
         }
     }
 }
@@ -190,10 +213,7 @@ mod tests {
         assert_eq!(tokenizer.step().ok(), Some(Token::MUL));
         assert_eq!(tokenizer.step().ok(), Some(Token::PI));
         assert_eq!(tokenizer.step().ok(), Some(Token::MINUS));
-        assert_eq!(
-            tokenizer.step().ok(),
-            Some(Token::ID("my_var".to_string()))
-        );
+        assert_eq!(tokenizer.step().ok(), Some(Token::ID("my_var".to_string())));
         assert_eq!(tokenizer.step().ok(), None);
     }
 }
