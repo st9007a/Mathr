@@ -30,7 +30,7 @@ impl Parser {
     fn factor(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
         if let Some(token) = self.get_next_token() {
             match token {
-                Token::Integer(value) => Ok(Box::new(IntegerNode::new(value))),
+                Token::Number(value) => Ok(Box::new(IntegerNode::new(value))),
                 Token::Add => Ok(Box::new(PosNode::new(self.factor()?))),
                 Token::Sub => Ok(Box::new(NegNode::new(self.factor()?))),
                 Token::ParentheseStart => {
