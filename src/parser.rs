@@ -32,7 +32,7 @@ impl Parser {
     }
 
     pub fn factor(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
-        if let Some(token) = self.get_next_token() {
+        if let Some(token) = self.next_token() {
             match token {
                 Token::INTEGER(value) => Ok(Box::new(IntegerNode::new(value))),
                 Token::PLUS => Ok(Box::new(PosNode::new(self.factor()?))),
@@ -40,7 +40,7 @@ impl Parser {
                 Token::LPAREN => {
                     let node = self.expr()?;
 
-                    self.get_next_token()
+                    self.next_token()
                         .ok_or(UnexpectedTokenError::new(Token::EOF))
                         .and_then(move |next_token| match next_token {
                             Token::RPAREN => Ok(node),
@@ -57,14 +57,14 @@ impl Parser {
     pub fn term(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
         let mut left = self.factor()?;
 
-        while let Some(token) = self.peek_next_token() {
+        while let Some(token) = self.peek_token() {
             match token {
                 Token::MUL => {
-                    self.get_next_token();
+                    self.next_token();
                     left = Box::new(MulNode::new(left, self.factor()?));
                 }
                 Token::DIV => {
-                    self.get_next_token();
+                    self.next_token();
                     left = Box::new(DivNode::new(left, self.factor()?));
                 }
                 _ => {
@@ -79,14 +79,14 @@ impl Parser {
     pub fn expr(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
         let mut left = self.term()?;
 
-        while let Some(token) = self.peek_next_token() {
+        while let Some(token) = self.peek_token() {
             match token {
                 Token::PLUS => {
-                    self.get_next_token();
+                    self.next_token();
                     left = Box::new(AddNode::new(left, self.term()?));
                 }
                 Token::MINUS => {
-                    self.get_next_token();
+                    self.next_token();
                     left = Box::new(SubNode::new(left, self.term()?));
                 }
                 _ => {
@@ -98,11 +98,11 @@ impl Parser {
         Ok(left)
     }
 
-    fn peek_next_token(&mut self) -> Option<&Token> {
+    fn peek_token(&mut self) -> Option<&Token> {
         self.token_iter.peek()
     }
 
-    fn get_next_token(&mut self) -> Option<Token> {
+    fn next_token(&mut self) -> Option<Token> {
         self.token_iter.next()
     }
 }
