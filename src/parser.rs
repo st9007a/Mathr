@@ -1,8 +1,8 @@
 use std::iter::Peekable;
 
-use crate::ast::{ASTNode, AddNode, DivNode, IntegerNode, MulNode, SubNode};
+use crate::ast::{ASTNode, AddNode, DivNode, IntegerNode, MulNode, NegNode, PosNode, SubNode};
 use crate::error::UnexpectedTokenError;
-use crate::token::{BinaryOpType, Token, TokenIterator, Tokenizer};
+use crate::token::{Token, TokenIterator, Tokenizer};
 
 pub struct Parser {
     token_iter: Peekable<TokenIterator>,
@@ -31,6 +31,8 @@ impl Parser {
         if let Some(token) = self.get_next_token() {
             match token {
                 Token::Integer(value) => Ok(Box::new(IntegerNode::new(value))),
+                Token::Add => Ok(Box::new(PosNode::new(self.factor()?))),
+                Token::Sub => Ok(Box::new(NegNode::new(self.factor()?))),
                 Token::ParentheseStart => {
                     let node = self.expr()?;
 
@@ -53,19 +55,14 @@ impl Parser {
 
         while let Some(token) = self.peek_next_token() {
             match token {
-                Token::BinaryOp(ref op_type) => match op_type {
-                    BinaryOpType::Mul => {
-                        self.get_next_token();
-                        left = Box::new(MulNode::new(left, self.factor()?));
-                    }
-                    BinaryOpType::Div => {
-                        self.get_next_token();
-                        left = Box::new(DivNode::new(left, self.factor()?));
-                    }
-                    _ => {
-                        break;
-                    }
-                },
+                Token::Mul => {
+                    self.get_next_token();
+                    left = Box::new(MulNode::new(left, self.factor()?));
+                }
+                Token::Div => {
+                    self.get_next_token();
+                    left = Box::new(DivNode::new(left, self.factor()?));
+                }
                 _ => {
                     break;
                 }
@@ -80,19 +77,14 @@ impl Parser {
 
         while let Some(token) = self.peek_next_token() {
             match token {
-                Token::BinaryOp(ref op_type) => match op_type {
-                    BinaryOpType::Add => {
-                        self.get_next_token();
-                        left = Box::new(AddNode::new(left, self.term()?));
-                    }
-                    BinaryOpType::Sub => {
-                        self.get_next_token();
-                        left = Box::new(SubNode::new(left, self.term()?));
-                    }
-                    _ => {
-                        break;
-                    }
-                },
+                Token::Add => {
+                    self.get_next_token();
+                    left = Box::new(AddNode::new(left, self.term()?));
+                }
+                Token::Sub => {
+                    self.get_next_token();
+                    left = Box::new(SubNode::new(left, self.term()?));
+                }
                 _ => {
                     break;
                 }
@@ -144,11 +136,20 @@ mod tests {
     }
 
     #[test]
-    fn test_parse() {
-        let mut parser = Parser::from_text("1 + 2 * (3 - 4 / 2) + 10");
+    fn test_factor_unary_op() {
+        let mut parser = Parser::from_text("- -   12");
         let node = parser.parse();
 
         assert!(node.is_ok());
-        assert_eq!(node.unwrap().eval(), 13);
+        assert_eq!(node.unwrap().eval(), 12);
+    }
+
+    #[test]
+    fn test_parse() {
+        let mut parser = Parser::from_text("1 + 2 * (-3 - 4 / 2) + 10");
+        let node = parser.parse();
+
+        assert!(node.is_ok());
+        assert_eq!(node.unwrap().eval(), 1);
     }
 }
