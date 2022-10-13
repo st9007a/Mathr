@@ -1,5 +1,7 @@
+use std::collections::HashMap;
+
 pub trait ASTNode {
-    fn eval(&self) -> i32;
+    fn eval(&self, symtab: &mut HashMap<String, i32>) -> i32;
 }
 
 pub trait UnaryOpFunction {

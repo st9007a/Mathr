@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use super::ast::ASTNode;
 
 pub struct IntegerNode {
@@ -11,7 +13,7 @@ impl IntegerNode {
 }
 
 impl ASTNode for IntegerNode {
-    fn eval(&self) -> i32 {
+    fn eval(&self, symtab: &mut HashMap<String, i32>) -> i32 {
         self.value
     }
 }

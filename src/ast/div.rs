@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use super::ast::{ASTNode, BinaryOpFunction};
 
 pub struct DivNode {
@@ -18,7 +20,7 @@ impl BinaryOpFunction for DivNode {
 }
 
 impl ASTNode for DivNode {
-    fn eval(&self) -> i32 {
-        self.exec(self.left.eval(), self.right.eval())
+    fn eval(&self, symtab: &mut HashMap<String, i32>) -> i32 {
+        self.exec(self.left.eval(symtab), self.right.eval(symtab))
     }
 }

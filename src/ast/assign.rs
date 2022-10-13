@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use super::{ASTNode, VarNode};
 
 pub struct AssignNode {
@@ -12,7 +14,11 @@ impl AssignNode {
 }
 
 impl ASTNode for AssignNode {
-    fn eval(&self) -> i32 {
-        panic!("Cannot evalute this node !");
+    fn eval(&self, symtab: &mut HashMap<String, i32>) -> i32 {
+        let value = self.expr.eval(symtab);
+
+        symtab.insert(self.var.get_name(), value);
+
+        value
     }
 }

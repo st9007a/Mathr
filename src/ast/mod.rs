@@ -1,8 +1,8 @@
 mod add;
 mod assign;
 mod ast;
-mod compound;
 mod div;
+mod error;
 mod int;
 mod mul;
 mod neg;

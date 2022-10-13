@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use super::ast::{ASTNode, UnaryOpFunction};
 
 pub struct NegNode {
@@ -17,7 +19,7 @@ impl UnaryOpFunction for NegNode {
 }
 
 impl ASTNode for NegNode {
-    fn eval(&self) -> i32 {
-        self.exec(self.node.eval())
+    fn eval(&self, symtab: &mut HashMap<String, i32>) -> i32 {
+        self.exec(self.node.eval(symtab))
     }
 }
