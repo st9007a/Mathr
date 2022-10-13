@@ -1,6 +1,8 @@
 use std::iter::Peekable;
 
-use crate::ast::{ASTNode, AddNode, DivNode, IntegerNode, MulNode, NegNode, PosNode, SubNode};
+use crate::ast::{
+    ASTNode, AddNode, DivNode, IntegerNode, MulNode, NegNode, PosNode, SubNode, VarNode,
+};
 use crate::error::UnexpectedTokenError;
 use crate::token::{Token, TokenIterator, Tokenizer};
 
@@ -31,13 +33,38 @@ impl Parser {
         self.expr()
     }
 
-    pub fn factor(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
+    pub fn variable(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
         if let Some(token) = self.next_token() {
             match token {
-                Token::INTEGER(value) => Ok(Box::new(IntegerNode::new(value))),
-                Token::PLUS => Ok(Box::new(PosNode::new(self.factor()?))),
-                Token::MINUS => Ok(Box::new(NegNode::new(self.factor()?))),
+                Token::PI => Ok(Box::new(VarNode::new("pi".to_string()))),
+                Token::E => Ok(Box::new(VarNode::new("e".to_string()))),
+                Token::ID(value) => Ok(Box::new(VarNode::new(value))),
+                _ => Err(UnexpectedTokenError::new(Token::EOF)),
+            }
+        } else {
+            Err(UnexpectedTokenError::new(Token::EOF))
+        }
+    }
+
+    pub fn factor(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
+        if let Some(token) = self.peek_token() {
+            match token {
+                Token::PLUS => {
+                    self.next_token();
+                    Ok(Box::new(PosNode::new(self.factor()?)))
+                }
+                Token::MINUS => {
+                    self.next_token();
+                    Ok(Box::new(NegNode::new(self.factor()?)))
+                }
+                Token::INTEGER(value) => {
+                    let node = Box::new(IntegerNode::new(value.clone()));
+
+                    self.next_token();
+                    Ok(node)
+                }
                 Token::LPAREN => {
+                    self.next_token();
                     let node = self.expr()?;
 
                     self.next_token()
@@ -47,7 +74,7 @@ impl Parser {
                             _ => Err(UnexpectedTokenError::new(next_token)),
                         })
                 }
-                _ => Err(UnexpectedTokenError::new(token)),
+                _ => self.variable(),
             }
         } else {
             Err(UnexpectedTokenError::new(Token::EOF))
