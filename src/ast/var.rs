@@ -11,8 +11,8 @@ impl VarNode {
         Self { name }
     }
 
-    pub fn get_name(&self) -> String {
-        self.name
+    pub fn get_name(&self) -> &String {
+        &self.name
     }
 }
 
@@ -21,6 +21,6 @@ impl ASTNode for VarNode {
         symtab
             .get(&self.name)
             .map(|value| *value)
-            .ok_or(UndefinedSymbolError::new(self.name))
+            .ok_or(UndefinedSymbolError::new(self.name.clone()))
     }
 }

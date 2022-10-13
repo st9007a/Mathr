@@ -18,7 +18,7 @@ impl ASTNode for AssignNode {
     fn eval(&self, symtab: &mut HashMap<String, i32>) -> Result<i32, UndefinedSymbolError> {
         let value = self.expr.eval(symtab)?;
 
-        symtab.insert(self.var.get_name(), value);
+        symtab.insert(self.var.get_name().to_string(), value);
 
         Ok(value)
     }
