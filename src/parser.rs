@@ -30,8 +30,8 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
-        self.expr()
+    pub fn parse(&mut self) -> Result<Box<StatementListNode>, UnexpectedTokenError> {
+        self.statement_list()
     }
 
     pub fn variable(&mut self) -> Result<Box<VarNode>, UnexpectedTokenError> {

@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
-use crate::ast::StatementListNode;
+use crate::ast::{ASTNode, StatementListNode};
+use crate::error::UnexpectedTokenError;
+use crate::parser::Parser;
 
 pub struct Interpreter {
     symtab: HashMap<String, i32>,
@@ -18,5 +20,26 @@ impl Interpreter {
             symtab,
             nodes: vec![],
         }
+    }
+
+    pub fn interpret(&mut self, content: &str) -> Result<(), UnexpectedTokenError> {
+        let mut parser = Parser::from_text(content);
+        let statement_list_node = parser.parse()?;
+
+        statement_list_node.eval(&mut self.symtab);
+        self.nodes.push(statement_list_node);
+
+        Ok(())
+    }
+
+    pub fn clear_state(&mut self) {
+        self.symtab.clear();
+        self.symtab.insert("e".to_string(), 2);
+        self.symtab.insert("pi".to_string(), 3);
+        self.nodes.clear();
+    }
+
+    pub fn query(&self, symbol: &String) -> Option<&i32> {
+        self.symtab.get(symbol)
     }
 }
