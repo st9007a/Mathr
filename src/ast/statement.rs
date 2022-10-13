@@ -1,11 +1,11 @@
-use super::ASTNode;
+use super::{ASTNode, AssignNode};
 
 pub struct StatementListNode {
-    nodes: Vec<Box<dyn ASTNode>>,
+    nodes: Vec<Box<AssignNode>>,
 }
 
 impl StatementListNode {
-    pub fn new(nodes: Vec<Box<dyn ASTNode>>) -> Self { Self { nodes } }
+    pub fn new(nodes: Vec<Box<AssignNode>>) -> Self { Self { nodes } }
 }
 
 impl ASTNode for StatementListNode {

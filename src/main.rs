@@ -2,6 +2,7 @@ pub mod ast;
 pub mod error;
 pub mod parser;
 pub mod token;
+pub mod interpreter;
 
 use std::io;
 use std::io::Write;

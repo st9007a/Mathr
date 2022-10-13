@@ -37,7 +37,7 @@ impl Tokenizer {
     }
 
     pub fn step(&mut self) -> Result<Token, InvalidSyntaxError> {
-        self.skip_whitespace();
+        self.skip_char();
 
         self.peek_char()
             .ok_or(InvalidSyntaxError::new("eof".to_string()))
@@ -110,9 +110,9 @@ impl Tokenizer {
         }
     }
 
-    fn skip_whitespace(&mut self) {
+    fn skip_char(&mut self) {
         while let Some(ch) = self.peek_char() {
-            if ch != ' ' {
+            if ch != ' ' && ch != '\n' {
                 break;
             }
             self.next_char();

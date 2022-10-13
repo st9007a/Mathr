@@ -58,13 +58,12 @@ impl Parser {
             })
     }
 
-    pub fn statement(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
+    pub fn statement(&mut self) -> Result<Box<AssignNode>, UnexpectedTokenError> {
         self.assignment_statement()
-            .map(|node| node as Box<dyn ASTNode>)
     }
 
     pub fn statement_list(&mut self) -> Result<Box<StatementListNode>, UnexpectedTokenError> {
-        let mut nodes: Vec<Box<dyn ASTNode>> = vec![self.statement()?];
+        let mut nodes: Vec<Box<AssignNode>> = vec![self.statement()?];
 
         while let Some(token) = self.peek_token() {
             match token {
