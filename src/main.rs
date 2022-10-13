@@ -7,9 +7,12 @@ pub mod interpreter;
 use std::io;
 use std::io::Write;
 
-use parser::Parser;
+use interpreter::Interpreter;
 
 fn main() -> io::Result<()> {
+
+    let mut interpreter = Interpreter::new();
+
     loop {
         let mut buffer = String::new();
 
@@ -18,12 +21,6 @@ fn main() -> io::Result<()> {
         io::stdin().read_line(&mut buffer)?;
 
         buffer.pop();
-
-        let mut parser = Parser::from_text(&buffer);
-
-        match parser.parse() {
-            Ok(node) => println!("{}", node.eval()),
-            Err(err) => println!("{}", err),
-        }
+        interpreter.interpret(&buffer);
     }
 }
