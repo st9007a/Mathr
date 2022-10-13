@@ -1,7 +1,8 @@
 use std::iter::Peekable;
 
 use crate::ast::{
-    ASTNode, AddNode, DivNode, IntegerNode, MulNode, NegNode, PosNode, SubNode, VarNode,
+    ASTNode, AddNode, AssignNode, DivNode, IntegerNode, MulNode, NegNode, PosNode,
+    StatementListNode, SubNode, VarNode,
 };
 use crate::error::UnexpectedTokenError;
 use crate::token::{Token, TokenIterator, Tokenizer};
@@ -33,7 +34,7 @@ impl Parser {
         self.expr()
     }
 
-    pub fn variable(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
+    pub fn variable(&mut self) -> Result<Box<VarNode>, UnexpectedTokenError> {
         if let Some(token) = self.next_token() {
             match token {
                 Token::PI => Ok(Box::new(VarNode::new("pi".to_string()))),
@@ -44,6 +45,40 @@ impl Parser {
         } else {
             Err(UnexpectedTokenError::new(Token::EOF))
         }
+    }
+
+    pub fn assignment_statement(&mut self) -> Result<Box<AssignNode>, UnexpectedTokenError> {
+        let var_node = self.variable()?;
+
+        self.next_token()
+            .ok_or(UnexpectedTokenError::new(Token::EOF))
+            .and_then(move |token| match token {
+                Token::ASSIGN => Ok(Box::new(AssignNode::new(var_node, self.expr()?))),
+                _ => Err(UnexpectedTokenError::new(token)),
+            })
+    }
+
+    pub fn statement(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
+        self.assignment_statement()
+            .map(|node| node as Box<dyn ASTNode>)
+    }
+
+    pub fn statement_list(&mut self) -> Result<Box<StatementListNode>, UnexpectedTokenError> {
+        let mut nodes: Vec<Box<dyn ASTNode>> = vec![self.statement()?];
+
+        while let Some(token) = self.peek_token() {
+            match token {
+                Token::SEMI => {
+                    self.next_token();
+                    nodes.push(self.statement()?);
+                }
+                _ => {
+                    break;
+                }
+            }
+        }
+
+        Ok(Box::new(StatementListNode::new(nodes)))
     }
 
     pub fn factor(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
@@ -74,7 +109,7 @@ impl Parser {
                             _ => Err(UnexpectedTokenError::new(next_token)),
                         })
                 }
-                _ => self.variable(),
+                _ => self.variable().map(|node| node as Box<dyn ASTNode>),
             }
         } else {
             Err(UnexpectedTokenError::new(Token::EOF))

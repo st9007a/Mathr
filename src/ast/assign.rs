@@ -1,13 +1,13 @@
-use super::ASTNode;
+use super::{ASTNode, VarNode};
 
 pub struct AssignNode {
-    left: Box<dyn ASTNode>,
-    right: Box<dyn ASTNode>,
+    var: Box<VarNode>,
+    expr: Box<dyn ASTNode>,
 }
 
 impl AssignNode {
-    pub fn new(left: Box<dyn ASTNode>, right: Box<dyn ASTNode>) -> Self {
-        Self { left, right }
+    pub fn new(var: Box<VarNode>, expr: Box<dyn ASTNode>) -> Self {
+        Self { var, expr }
     }
 }
 
