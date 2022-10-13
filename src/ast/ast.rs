@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 
+use super::error::UndefinedSymbolError;
+
 pub trait ASTNode {
-    fn eval(&self, symtab: &mut HashMap<String, i32>) -> i32;
+    fn eval(&self, symtab: &mut HashMap<String, i32>) -> Result<i32, UndefinedSymbolError>;
 }
 
 pub trait UnaryOpFunction {

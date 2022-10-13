@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use super::ast::{ASTNode, BinaryOpFunction};
+use super::error::UndefinedSymbolError;
 
 pub struct AddNode {
     left: Box<dyn ASTNode>,
@@ -20,7 +21,10 @@ impl BinaryOpFunction for AddNode {
 }
 
 impl ASTNode for AddNode {
-    fn eval(&self, symtab: &mut HashMap<String, i32>) -> i32 {
-        self.exec(self.left.eval(symtab), self.right.eval(symtab))
+    fn eval(&self, symtab: &mut HashMap<String, i32>) -> Result<i32, UndefinedSymbolError> {
+        let left = self.left.eval(symtab)?;
+        let right = self.right.eval(symtab)?;
+
+        Ok(self.exec(left, right))
     }
 }
