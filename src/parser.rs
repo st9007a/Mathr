@@ -170,9 +170,10 @@ impl Parser {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
     use super::ASTNode;
     use super::Parser;
-    use std::collections::HashMap;
 
     #[test]
     fn test_factor_integer() {
@@ -232,5 +233,6 @@ mod tests {
 
         assert!(node.is_ok());
         assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 1);
+        assert_eq!(symtab.get("x"), Some(&1));
     }
 }
