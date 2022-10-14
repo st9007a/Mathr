@@ -226,7 +226,7 @@ mod tests {
 
     #[test]
     fn test_parse() {
-        let mut parser = Parser::from_text("1 + 2 * (-3 - 4 / 2) + 10");
+        let mut parser = Parser::from_text("x = 1 + 2 * (-3 - 4 / 2) + 10");
         let mut symtab: HashMap<String, i32> = HashMap::new();
         let node = parser.parse();
 

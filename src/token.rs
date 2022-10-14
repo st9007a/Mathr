@@ -180,20 +180,23 @@ mod tests {
 
     #[test]
     fn test_into_iter() {
-        let mut tokenizer = Tokenizer::new("1 + 2*(510   - 33 )  / 7 ").into_iter();
+        let tokenizer = Tokenizer::new("1 + 2*(510   - 33 )  / 7 ");
+        let tokens: Vec<Token> = tokenizer.into_iter().collect();
 
-        assert_eq!(tokenizer.next(), Some(Token::INTEGER(1)));
-        assert_eq!(tokenizer.next(), Some(Token::PLUS));
-        assert_eq!(tokenizer.next(), Some(Token::INTEGER(2)));
-        assert_eq!(tokenizer.next(), Some(Token::MUL));
-        assert_eq!(tokenizer.next(), Some(Token::LPAREN));
-        assert_eq!(tokenizer.next(), Some(Token::INTEGER(510)));
-        assert_eq!(tokenizer.next(), Some(Token::MINUS));
-        assert_eq!(tokenizer.next(), Some(Token::INTEGER(33)));
-        assert_eq!(tokenizer.next(), Some(Token::RPAREN));
-        assert_eq!(tokenizer.next(), Some(Token::DIV));
-        assert_eq!(tokenizer.next(), Some(Token::INTEGER(7)));
-        assert_eq!(tokenizer.next(), None);
+        assert_eq!(tokens, [
+            Token::INTEGER(1),
+            Token::PLUS,
+            Token::INTEGER(2),
+            Token::MUL,
+            Token::LPAREN,
+            Token::INTEGER(510),
+            Token::MINUS,
+            Token::INTEGER(33),
+            Token::RPAREN,
+            Token::DIV,
+            Token::INTEGER(7),
+        ]);
+
     }
 
     #[test]
