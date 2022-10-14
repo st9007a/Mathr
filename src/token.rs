@@ -36,7 +36,7 @@ impl Tokenizer {
         }
     }
 
-    pub fn step(&mut self) -> Result<Token, InterpreterError> {
+    pub fn next_token(&mut self) -> Result<Token, InterpreterError> {
         self.skip_char();
 
         self.peek_char()
@@ -162,7 +162,7 @@ impl Iterator for TokenIterator {
     type Item = Token;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.0.step().ok()
+        self.0.next_token().ok()
     }
 }
 
@@ -183,18 +183,18 @@ mod tests {
     fn test_step() {
         let mut tokenizer = Tokenizer::new("1 + 2*(510   - 33 )  / 7.5 ");
 
-        assert_eq!(tokenizer.step().ok(), Some(Token::NUMBER(1f64)));
-        assert_eq!(tokenizer.step().ok(), Some(Token::PLUS));
-        assert_eq!(tokenizer.step().ok(), Some(Token::NUMBER(2f64)));
-        assert_eq!(tokenizer.step().ok(), Some(Token::MUL));
-        assert_eq!(tokenizer.step().ok(), Some(Token::LPAREN));
-        assert_eq!(tokenizer.step().ok(), Some(Token::NUMBER(510f64)));
-        assert_eq!(tokenizer.step().ok(), Some(Token::MINUS));
-        assert_eq!(tokenizer.step().ok(), Some(Token::NUMBER(33f64)));
-        assert_eq!(tokenizer.step().ok(), Some(Token::RPAREN));
-        assert_eq!(tokenizer.step().ok(), Some(Token::DIV));
-        assert_eq!(tokenizer.step().ok(), Some(Token::NUMBER(7.5f64)));
-        assert_eq!(tokenizer.step().ok(), None);
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::NUMBER(1f64)));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::PLUS));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::NUMBER(2f64)));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::MUL));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::LPAREN));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::NUMBER(510f64)));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::MINUS));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::NUMBER(33f64)));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::RPAREN));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::DIV));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::NUMBER(7.5f64)));
+        assert_eq!(tokenizer.next_token().ok(), None);
     }
 
     #[test]
@@ -224,18 +224,18 @@ mod tests {
     fn test_parse_indentity() {
         let mut tokenizer = Tokenizer::new("e + 12 * -1.2e10 * pi - my_var");
 
-        assert_eq!(tokenizer.step().ok(), Some(Token::E));
-        assert_eq!(tokenizer.step().ok(), Some(Token::PLUS));
-        assert_eq!(tokenizer.step().ok(), Some(Token::NUMBER(12f64)));
-        assert_eq!(tokenizer.step().ok(), Some(Token::MUL));
-        assert_eq!(tokenizer.step().ok(), Some(Token::MINUS));
-        assert_eq!(tokenizer.step().ok(), Some(Token::NUMBER(1.2f64)));
-        assert_eq!(tokenizer.step().ok(), Some(Token::E));
-        assert_eq!(tokenizer.step().ok(), Some(Token::NUMBER(10f64)));
-        assert_eq!(tokenizer.step().ok(), Some(Token::MUL));
-        assert_eq!(tokenizer.step().ok(), Some(Token::PI));
-        assert_eq!(tokenizer.step().ok(), Some(Token::MINUS));
-        assert_eq!(tokenizer.step().ok(), Some(Token::ID("my_var".to_string())));
-        assert_eq!(tokenizer.step().ok(), None);
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::E));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::PLUS));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::NUMBER(12f64)));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::MUL));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::MINUS));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::NUMBER(1.2f64)));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::E));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::NUMBER(10f64)));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::MUL));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::PI));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::MINUS));
+        assert_eq!(tokenizer.next_token().ok(), Some(Token::ID("my_var".to_string())));
+        assert_eq!(tokenizer.next_token().ok(), None);
     }
 }
