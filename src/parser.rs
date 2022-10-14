@@ -1,7 +1,7 @@
 use std::iter::Peekable;
 
 use crate::ast::{
-    ASTNode, AddNode, AssignNode, DivNode, IntegerNode, MulNode, NegNode, PosNode,
+    ASTNode, AddNode, AssignNode, DivNode, NumberNode, MulNode, NegNode, PosNode,
     StatementListNode, SubNode, VarNode,
 };
 use crate::error::InterpreterError;
@@ -92,7 +92,7 @@ impl Parser {
                     Ok(Box::new(NegNode::new(self.factor()?)))
                 }
                 Token::INTEGER(value) => {
-                    let node = Box::new(IntegerNode::new(value.clone()));
+                    let node = Box::new(NumberNode::new(value.clone()));
 
                     self.next_token();
                     Ok(node)
