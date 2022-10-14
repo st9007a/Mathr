@@ -29,10 +29,10 @@ impl Parser {
                 Token::PI => Ok(Box::new(VarNode::new("pi".to_string()))),
                 Token::E => Ok(Box::new(VarNode::new("e".to_string()))),
                 Token::ID(value) => Ok(Box::new(VarNode::new(value.to_string()))),
-                _ => Err(InterpreterError::UnexpectedToken(Token::EOF)),
+                _ => Err(InterpreterError::EOF),
             }
         } else {
-            Err(InterpreterError::UnexpectedToken(Token::EOF))
+            Err(InterpreterError::EOF)
         }
     }
 
@@ -40,7 +40,7 @@ impl Parser {
         let var_node = self.variable()?;
 
         self.next_token()
-            .ok_or(InterpreterError::UnexpectedToken(Token::EOF))
+            .ok_or(InterpreterError::EOF)
             .and_then(move |token| match token {
                 Token::ASSIGN => Ok(Box::new(AssignNode::new(var_node, self.expr()?))),
                 _ => Err(InterpreterError::UnexpectedToken(token)),
@@ -91,7 +91,7 @@ impl Parser {
                     let node = self.expr()?;
 
                     self.next_token()
-                        .ok_or(InterpreterError::UnexpectedToken(Token::EOF))
+                        .ok_or(InterpreterError::EOF)
                         .and_then(move |next_token| match next_token {
                             Token::RPAREN => Ok(node),
                             _ => Err(InterpreterError::UnexpectedToken(next_token)),
@@ -100,7 +100,7 @@ impl Parser {
                 _ => self.variable().map(|node| node as Box<dyn ASTNode>),
             }
         } else {
-            Err(InterpreterError::UnexpectedToken(Token::EOF))
+            Err(InterpreterError::EOF)
         }
     }
 

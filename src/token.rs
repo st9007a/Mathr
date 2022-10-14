@@ -14,5 +14,4 @@ pub enum Token {
     PI,
     E,
     SEMI,
-    EOF,
 }
