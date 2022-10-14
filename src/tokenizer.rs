@@ -27,7 +27,7 @@ impl Tokenizer {
                     _ => {
                         return Err(err);
                     }
-                }
+                },
             }
         }
 
@@ -36,6 +36,7 @@ impl Tokenizer {
 
     pub fn next(&mut self) -> Result<Token, InterpreterError> {
         self.skip_char();
+        self.skip_comment();
 
         self.peek_char()
             .ok_or(InterpreterError::EOF)
@@ -132,6 +133,20 @@ impl Tokenizer {
         }
     }
 
+    fn skip_comment(&mut self) {
+        if let Some(ch) = self.peek_char() {
+            if ch == '#' {
+                self.next_char();
+
+                while let Some(ch) = self.next_char() {
+                    if ch == '\n' {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     fn peek_char(&self) -> Option<char> {
         if self.ptr < self.charvec.len() {
             Some(self.charvec[self.ptr])
@@ -158,7 +173,8 @@ mod tests {
 
     #[test]
     fn test_try_collect() {
-        let mut tokenizer = Tokenizer::new("x = 1 + 2*(510   - 33 )  / 7.5 + (e * my_var)");
+        let mut tokenizer =
+            Tokenizer::new("x = 1 + 2*(510   - 33 )  / 7.5 + (e * my_var) # Some comment");
 
         let token_result = tokenizer.try_collect();
 
@@ -166,27 +182,29 @@ mod tests {
 
         let tokens = token_result.unwrap();
 
-        assert_eq!(tokens, vec![
-            Token::ID("x".to_string()),
-            Token::ASSIGN,
-            Token::NUMBER(1.),
-            Token::PLUS,
-            Token::NUMBER(2.),
-            Token::MUL,
-            Token::LPAREN,
-            Token::NUMBER(510.),
-            Token::MINUS,
-            Token::NUMBER(33.),
-            Token::RPAREN,
-            Token::DIV,
-            Token::NUMBER(7.5),
-            Token::PLUS,
-            Token::LPAREN,
-            Token::E,
-            Token::MUL,
-            Token::ID("my_var".to_string()),
-            Token::RPAREN,
-        ]);
+        assert_eq!(
+            tokens,
+            vec![
+                Token::ID("x".to_string()),
+                Token::ASSIGN,
+                Token::NUMBER(1.),
+                Token::PLUS,
+                Token::NUMBER(2.),
+                Token::MUL,
+                Token::LPAREN,
+                Token::NUMBER(510.),
+                Token::MINUS,
+                Token::NUMBER(33.),
+                Token::RPAREN,
+                Token::DIV,
+                Token::NUMBER(7.5),
+                Token::PLUS,
+                Token::LPAREN,
+                Token::E,
+                Token::MUL,
+                Token::ID("my_var".to_string()),
+                Token::RPAREN,
+            ]
+        );
     }
-
 }
