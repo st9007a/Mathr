@@ -1,4 +1,5 @@
 use std::iter::Peekable;
+use std::vec::IntoIter;
 
 use crate::ast::{
     ASTNode, AddNode, AssignNode, DivNode, MulNode, NegNode, NumberNode, PosNode,
@@ -8,7 +9,7 @@ use crate::error::InterpreterError;
 use crate::token::Token;
 
 pub struct Parser {
-    tokens: Peekable<std::vec::IntoIter<Token>>,
+    tokens: Peekable<IntoIter<Token>>,
 }
 
 impl Parser {
