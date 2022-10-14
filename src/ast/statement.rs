@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use super::error::UndefinedSymbolError;
+use crate::error::InterpreterError;
+
 use super::{ASTNode, AssignNode};
 
 pub struct StatementListNode {
@@ -14,7 +15,7 @@ impl StatementListNode {
 }
 
 impl ASTNode for StatementListNode {
-    fn eval(&self, symtab: &mut HashMap<String, i32>) -> Result<i32, UndefinedSymbolError> {
+    fn eval(&self, symtab: &mut HashMap<String, i32>) -> Result<i32, InterpreterError> {
         let mut value: i32 = 0;
 
         for node in self.nodes.iter() {

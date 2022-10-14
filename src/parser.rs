@@ -4,7 +4,7 @@ use crate::ast::{
     ASTNode, AddNode, AssignNode, DivNode, IntegerNode, MulNode, NegNode, PosNode,
     StatementListNode, SubNode, VarNode,
 };
-use crate::error::UnexpectedTokenError;
+use crate::error::InterpreterError;
 use crate::token::{Token, TokenIterator, Tokenizer};
 
 pub struct Parser {
@@ -30,39 +30,39 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self) -> Result<Box<StatementListNode>, UnexpectedTokenError> {
+    pub fn parse(&mut self) -> Result<Box<StatementListNode>, InterpreterError> {
         self.statement_list()
     }
 
-    pub fn variable(&mut self) -> Result<Box<VarNode>, UnexpectedTokenError> {
+    pub fn variable(&mut self) -> Result<Box<VarNode>, InterpreterError> {
         if let Some(token) = self.next_token() {
             match token {
                 Token::PI => Ok(Box::new(VarNode::new("pi".to_string()))),
                 Token::E => Ok(Box::new(VarNode::new("e".to_string()))),
                 Token::ID(value) => Ok(Box::new(VarNode::new(value))),
-                _ => Err(UnexpectedTokenError::new(Token::EOF)),
+                _ => Err(InterpreterError::UnexpectedToken(Token::EOF)),
             }
         } else {
-            Err(UnexpectedTokenError::new(Token::EOF))
+            Err(InterpreterError::UnexpectedToken(Token::EOF))
         }
     }
 
-    pub fn assignment_statement(&mut self) -> Result<Box<AssignNode>, UnexpectedTokenError> {
+    pub fn assignment_statement(&mut self) -> Result<Box<AssignNode>, InterpreterError> {
         let var_node = self.variable()?;
 
         self.next_token()
-            .ok_or(UnexpectedTokenError::new(Token::EOF))
+            .ok_or(InterpreterError::UnexpectedToken(Token::EOF))
             .and_then(move |token| match token {
                 Token::ASSIGN => Ok(Box::new(AssignNode::new(var_node, self.expr()?))),
-                _ => Err(UnexpectedTokenError::new(token)),
+                _ => Err(InterpreterError::UnexpectedToken(token)),
             })
     }
 
-    pub fn statement(&mut self) -> Result<Box<AssignNode>, UnexpectedTokenError> {
+    pub fn statement(&mut self) -> Result<Box<AssignNode>, InterpreterError> {
         self.assignment_statement()
     }
 
-    pub fn statement_list(&mut self) -> Result<Box<StatementListNode>, UnexpectedTokenError> {
+    pub fn statement_list(&mut self) -> Result<Box<StatementListNode>, InterpreterError> {
         let mut nodes: Vec<Box<AssignNode>> = vec![self.statement()?];
 
         while let Some(token) = self.peek_token() {
@@ -80,7 +80,7 @@ impl Parser {
         Ok(Box::new(StatementListNode::new(nodes)))
     }
 
-    pub fn factor(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
+    pub fn factor(&mut self) -> Result<Box<dyn ASTNode>, InterpreterError> {
         if let Some(token) = self.peek_token() {
             match token {
                 Token::PLUS => {
@@ -102,20 +102,20 @@ impl Parser {
                     let node = self.expr()?;
 
                     self.next_token()
-                        .ok_or(UnexpectedTokenError::new(Token::EOF))
+                        .ok_or(InterpreterError::UnexpectedToken(Token::EOF))
                         .and_then(move |next_token| match next_token {
                             Token::RPAREN => Ok(node),
-                            _ => Err(UnexpectedTokenError::new(next_token)),
+                            _ => Err(InterpreterError::UnexpectedToken(next_token)),
                         })
                 }
                 _ => self.variable().map(|node| node as Box<dyn ASTNode>),
             }
         } else {
-            Err(UnexpectedTokenError::new(Token::EOF))
+            Err(InterpreterError::UnexpectedToken(Token::EOF))
         }
     }
 
-    pub fn term(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
+    pub fn term(&mut self) -> Result<Box<dyn ASTNode>, InterpreterError> {
         let mut left = self.factor()?;
 
         while let Some(token) = self.peek_token() {
@@ -137,7 +137,7 @@ impl Parser {
         Ok(left)
     }
 
-    pub fn expr(&mut self) -> Result<Box<dyn ASTNode>, UnexpectedTokenError> {
+    pub fn expr(&mut self) -> Result<Box<dyn ASTNode>, InterpreterError> {
         let mut left = self.term()?;
 
         while let Some(token) = self.peek_token() {

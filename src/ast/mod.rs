@@ -2,7 +2,6 @@ mod add;
 mod assign;
 mod ast;
 mod div;
-mod error;
 mod int;
 mod mul;
 mod neg;

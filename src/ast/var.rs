@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
-use super::{error::UndefinedSymbolError, ASTNode};
+use crate::error::InterpreterError;
+
+use super::ASTNode;
 
 pub struct VarNode {
     name: String,
@@ -17,10 +19,10 @@ impl VarNode {
 }
 
 impl ASTNode for VarNode {
-    fn eval(&self, symtab: &mut HashMap<String, i32>) -> Result<i32, UndefinedSymbolError> {
+    fn eval(&self, symtab: &mut HashMap<String, i32>) -> Result<i32, InterpreterError> {
         symtab
             .get(&self.name)
             .map(|value| *value)
-            .ok_or(UndefinedSymbolError::new(self.name.clone()))
+            .ok_or(InterpreterError::UndefinedSymbol(self.name.clone()))
     }
 }

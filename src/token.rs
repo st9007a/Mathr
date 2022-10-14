@@ -1,6 +1,6 @@
 use std::result::Result;
 
-use crate::error::InvalidSyntaxError;
+use crate::error::InterpreterError;
 
 #[derive(Debug, PartialEq)]
 pub enum Token {
@@ -36,11 +36,11 @@ impl Tokenizer {
         }
     }
 
-    pub fn step(&mut self) -> Result<Token, InvalidSyntaxError> {
+    pub fn step(&mut self) -> Result<Token, InterpreterError> {
         self.skip_char();
 
         self.peek_char()
-            .ok_or(InvalidSyntaxError::new("eof".to_string()))
+            .ok_or(InterpreterError::InvalidSyntax("eof".to_string()))
             .and_then(|ch| {
                 if ch.is_ascii_digit() {
                     self.next_integer()
@@ -60,7 +60,7 @@ impl Tokenizer {
                         '.' => Ok(Token::DOT),
                         '=' => Ok(Token::ASSIGN),
                         ';' => Ok(Token::SEMI),
-                        _ => Err(InvalidSyntaxError::new(ch.to_string())),
+                        _ => Err(InterpreterError::InvalidSyntax(ch.to_string())),
                     }
                 }
             })
@@ -70,7 +70,7 @@ impl Tokenizer {
         TokenIterator(self)
     }
 
-    fn next_integer(&mut self) -> Result<Token, InvalidSyntaxError> {
+    fn next_integer(&mut self) -> Result<Token, InterpreterError> {
         let mut cur = String::new();
 
         while let Some(ch) = self.peek_char() {
@@ -83,10 +83,10 @@ impl Tokenizer {
 
         cur.parse::<i32>()
             .map(|num| Token::INTEGER(num))
-            .map_err(|_| InvalidSyntaxError::new(cur))
+            .map_err(|_| InterpreterError::InvalidSyntax(cur))
     }
 
-    fn next_identity(&mut self) -> Result<Token, InvalidSyntaxError> {
+    fn next_identity(&mut self) -> Result<Token, InterpreterError> {
         let mut cur = String::new();
 
         while let Some(ch) = self.peek_char() {
