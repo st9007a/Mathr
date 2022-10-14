@@ -4,7 +4,7 @@ use crate::error::InterpreterError;
 
 #[derive(Debug, PartialEq)]
 pub enum Token {
-    INTEGER(i32),
+    INTEGER(String),
     ID(String),
     PLUS,
     MINUS,
@@ -81,9 +81,7 @@ impl Tokenizer {
             cur.push(self.next_char().unwrap());
         }
 
-        cur.parse::<i32>()
-            .map(|num| Token::INTEGER(num))
-            .map_err(|_| InterpreterError::InvalidSyntax(cur))
+        Ok(Token::INTEGER(cur))
     }
 
     fn next_identity(&mut self) -> Result<Token, InterpreterError> {
@@ -164,17 +162,17 @@ mod tests {
     fn test_step() {
         let mut tokenizer = Tokenizer::new("1 + 2*(510   - 33 )  / 7 ");
 
-        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER(1)));
+        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER("1".to_string())));
         assert_eq!(tokenizer.step().ok(), Some(Token::PLUS));
-        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER(2)));
+        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER("2".to_string())));
         assert_eq!(tokenizer.step().ok(), Some(Token::MUL));
         assert_eq!(tokenizer.step().ok(), Some(Token::LPAREN));
-        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER(510)));
+        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER("510".to_string())));
         assert_eq!(tokenizer.step().ok(), Some(Token::MINUS));
-        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER(33)));
+        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER("33".to_string())));
         assert_eq!(tokenizer.step().ok(), Some(Token::RPAREN));
         assert_eq!(tokenizer.step().ok(), Some(Token::DIV));
-        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER(7)));
+        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER("7".to_string())));
         assert_eq!(tokenizer.step().ok(), None);
     }
 
@@ -184,17 +182,17 @@ mod tests {
         let tokens: Vec<Token> = tokenizer.into_iter().collect();
 
         assert_eq!(tokens, [
-            Token::INTEGER(1),
+            Token::INTEGER("1".to_string()),
             Token::PLUS,
-            Token::INTEGER(2),
+            Token::INTEGER("2".to_string()),
             Token::MUL,
             Token::LPAREN,
-            Token::INTEGER(510),
+            Token::INTEGER("510".to_string()),
             Token::MINUS,
-            Token::INTEGER(33),
+            Token::INTEGER("33".to_string()),
             Token::RPAREN,
             Token::DIV,
-            Token::INTEGER(7),
+            Token::INTEGER("7".to_string()),
         ]);
 
     }
@@ -205,14 +203,14 @@ mod tests {
 
         assert_eq!(tokenizer.step().ok(), Some(Token::E));
         assert_eq!(tokenizer.step().ok(), Some(Token::PLUS));
-        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER(12)));
+        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER("12".to_string())));
         assert_eq!(tokenizer.step().ok(), Some(Token::MUL));
         assert_eq!(tokenizer.step().ok(), Some(Token::MINUS));
-        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER(1)));
+        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER("1".to_string())));
         assert_eq!(tokenizer.step().ok(), Some(Token::DOT));
-        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER(2)));
+        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER("2".to_string())));
         assert_eq!(tokenizer.step().ok(), Some(Token::E));
-        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER(10)));
+        assert_eq!(tokenizer.step().ok(), Some(Token::INTEGER("10".to_string())));
         assert_eq!(tokenizer.step().ok(), Some(Token::MUL));
         assert_eq!(tokenizer.step().ok(), Some(Token::PI));
         assert_eq!(tokenizer.step().ok(), Some(Token::MINUS));
