@@ -4,6 +4,7 @@ use std::f64::consts;
 use crate::ast::{ASTNode, StatementListNode};
 use crate::error::InterpreterError;
 use crate::parser::Parser;
+use crate::tokenizer::Tokenizer;
 
 pub struct Interpreter {
     symtab: HashMap<String, f64>,
@@ -24,8 +25,8 @@ impl Interpreter {
     }
 
     pub fn interpret(&mut self, content: &str) -> Result<f64, InterpreterError> {
-        let mut parser = Parser::from_text(content);
-        let statement_list_node = parser.parse()?;
+        let tokens = Tokenizer::new(content).try_collect()?;
+        let statement_list_node = Parser::new(tokens).parse()?;
 
         let value = statement_list_node.eval(&mut self.symtab)?;
         self.nodes.push(statement_list_node);

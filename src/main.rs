@@ -3,6 +3,7 @@ pub mod error;
 pub mod interpreter;
 pub mod parser;
 pub mod token;
+pub mod tokenizer;
 
 use std::io;
 use std::io::Write;
