@@ -8,6 +8,7 @@ pub enum InterpreterError {
     InvalidSyntax(String),
     UnexpectedToken(Token),
     UndefinedSymbol(String),
+    EOF,
 }
 
 impl error::Error for InterpreterError {}
@@ -23,6 +24,9 @@ impl fmt::Display for InterpreterError {
             }
             InterpreterError::UndefinedSymbol(symbol) => {
                 write!(f, "Undefined symbol: {}", symbol)
+            }
+            InterpreterError::EOF => {
+                write!(f, "End of file.")
             }
         }
     }

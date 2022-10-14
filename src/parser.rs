@@ -5,28 +5,16 @@ use crate::ast::{
     StatementListNode, SubNode, VarNode,
 };
 use crate::error::InterpreterError;
-use crate::token::{Token, TokenIterator, Tokenizer};
+use crate::token::Token;
 
 pub struct Parser {
-    token_iter: Peekable<TokenIterator>,
+    tokens: Peekable<std::vec::IntoIter<Token>>,
 }
 
 impl Parser {
-    pub fn from_text(text: &str) -> Self {
+    pub fn new(tokens: Vec<Token>) -> Self {
         Self {
-            token_iter: Tokenizer::new(text).into_iter().peekable(),
-        }
-    }
-
-    pub fn from_tokenizer(tokenizer: Tokenizer) -> Self {
-        Self {
-            token_iter: tokenizer.into_iter().peekable(),
-        }
-    }
-
-    pub fn from_iter(token_iter: TokenIterator) -> Self {
-        Self {
-            token_iter: token_iter.peekable(),
+            tokens: tokens.into_iter().peekable(),
         }
     }
 
@@ -39,7 +27,7 @@ impl Parser {
             match token {
                 Token::PI => Ok(Box::new(VarNode::new("pi".to_string()))),
                 Token::E => Ok(Box::new(VarNode::new("e".to_string()))),
-                Token::ID(value) => Ok(Box::new(VarNode::new(value))),
+                Token::ID(value) => Ok(Box::new(VarNode::new(value.to_string()))),
                 _ => Err(InterpreterError::UnexpectedToken(Token::EOF)),
             }
         } else {
@@ -160,11 +148,11 @@ impl Parser {
     }
 
     fn peek_token(&mut self) -> Option<&Token> {
-        self.token_iter.peek()
+        self.tokens.peek()
     }
 
     fn next_token(&mut self) -> Option<Token> {
-        self.token_iter.next()
+        self.tokens.next()
     }
 }
 
@@ -172,12 +160,15 @@ impl Parser {
 mod tests {
     use std::collections::HashMap;
 
-    use super::ASTNode;
+    use crate::ast::ASTNode;
+    use crate::token::Token;
+
     use super::Parser;
 
     #[test]
     fn test_factor_integer() {
-        let mut parser = Parser::from_text(" 123   ");
+        let tokens = vec![Token::NUMBER(123.)];
+        let mut parser = Parser::new(tokens);
         let mut symtab: HashMap<String, f64> = HashMap::new();
         let node = parser.factor();
 
@@ -187,7 +178,8 @@ mod tests {
 
     #[test]
     fn test_term() {
-        let mut parser = Parser::from_text("4 * 12");
+        let tokens = vec![Token::NUMBER(4.), Token::MUL, Token::NUMBER(12.)];
+        let mut parser = Parser::new(tokens);
         let mut symtab: HashMap<String, f64> = HashMap::new();
         let node = parser.term();
 
@@ -197,7 +189,8 @@ mod tests {
 
     #[test]
     fn test_expr() {
-        let mut parser = Parser::from_text("4311 + 111");
+        let tokens = vec![Token::NUMBER(4311.), Token::PLUS, Token::NUMBER(111.)];
+        let mut parser = Parser::new(tokens);
         let mut symtab: HashMap<String, f64> = HashMap::new();
         let node = parser.expr();
 
@@ -207,7 +200,14 @@ mod tests {
 
     #[test]
     fn test_factor_parenthesis() {
-        let mut parser = Parser::from_text(" ( 12 + 21)");
+        let tokens = vec![
+            Token::LPAREN,
+            Token::NUMBER(12.),
+            Token::PLUS,
+            Token::NUMBER(21.),
+            Token::RPAREN,
+        ];
+        let mut parser = Parser::new(tokens);
         let mut symtab: HashMap<String, f64> = HashMap::new();
         let node = parser.factor();
 
@@ -217,7 +217,8 @@ mod tests {
 
     #[test]
     fn test_factor_unary_op() {
-        let mut parser = Parser::from_text("- -   12");
+        let tokens = vec![Token::PLUS, Token::PLUS, Token::NUMBER(12.)];
+        let mut parser = Parser::new(tokens);
         let mut symtab: HashMap<String, f64> = HashMap::new();
         let node = parser.factor();
 
@@ -227,7 +228,25 @@ mod tests {
 
     #[test]
     fn test_parse() {
-        let mut parser = Parser::from_text("x = 1 + 2 * (-3 - 4 / 2) + 10");
+        let tokens = vec![
+            Token::ID("x".to_string()),
+            Token::ASSIGN,
+            Token::NUMBER(1.),
+            Token::PLUS,
+            Token::NUMBER(2.),
+            Token::MUL,
+            Token::LPAREN,
+            Token::MINUS,
+            Token::NUMBER(3.),
+            Token::MINUS,
+            Token::NUMBER(4.),
+            Token::DIV,
+            Token::NUMBER(2.),
+            Token::RPAREN,
+            Token::PLUS,
+            Token::NUMBER(10.),
+        ];
+        let mut parser = Parser::new(tokens);
         let mut symtab: HashMap<String, f64> = HashMap::new();
         let node = parser.parse();
 
