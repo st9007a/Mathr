@@ -1,8 +1,8 @@
 pub mod ast;
 pub mod error;
+pub mod interpreter;
 pub mod parser;
 pub mod token;
-pub mod interpreter;
 
 use std::io;
 use std::io::Write;
@@ -10,7 +10,6 @@ use std::io::Write;
 use interpreter::Interpreter;
 
 fn main() -> io::Result<()> {
-
     let mut interpreter = Interpreter::new();
 
     loop {
@@ -21,6 +20,10 @@ fn main() -> io::Result<()> {
         io::stdin().read_line(&mut buffer)?;
 
         buffer.pop();
-        interpreter.interpret(&buffer);
+
+        match interpreter.interpret(&buffer) {
+            Ok(value) => println!("{}", value),
+            Err(err) => println!("{:?}", err),
+        }
     }
 }

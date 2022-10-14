@@ -22,14 +22,14 @@ impl Interpreter {
         }
     }
 
-    pub fn interpret(&mut self, content: &str) -> Result<(), InterpreterError> {
+    pub fn interpret(&mut self, content: &str) -> Result<i32, InterpreterError> {
         let mut parser = Parser::from_text(content);
         let statement_list_node = parser.parse()?;
 
-        statement_list_node.eval(&mut self.symtab)?;
+        let value = statement_list_node.eval(&mut self.symtab)?;
         self.nodes.push(statement_list_node);
 
-        Ok(())
+        Ok(value)
     }
 
     pub fn clear_state(&mut self) {
