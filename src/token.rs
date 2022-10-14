@@ -1,6 +1,6 @@
 use std::result::Result;
 
-use crate::error::InvalidSyntaxError;
+use crate::error::InterpreterError;
 
 #[derive(Debug, PartialEq)]
 pub enum Token {
@@ -36,41 +36,41 @@ impl Tokenizer {
         }
     }
 
-    pub fn step(&mut self) -> Result<Token, InvalidSyntaxError> {
-        self.skip_whitespace();
+    pub fn step(&mut self) -> Result<Token, InterpreterError> {
+        self.skip_char();
 
-        if let Some(ch) = self.peek_char() {
-            if ch.is_ascii_digit() {
-                self.consume_integer()
-            } else if ch.is_ascii_alphabetic() || ch == '_' {
-                self.consume_identity()
-            } else {
-                self.next_char();
+        self.peek_char()
+            .ok_or(InterpreterError::InvalidSyntax("eof".to_string()))
+            .and_then(|ch| {
+                if ch.is_ascii_digit() {
+                    self.next_integer()
+                } else if ch.is_ascii_alphabetic() || ch == '_' {
+                    self.next_identity()
+                } else {
+                    self.next_char();
 
-                match ch {
-                    '+' => Ok(Token::PLUS),
-                    '-' => Ok(Token::MINUS),
-                    '*' => Ok(Token::MUL),
-                    '/' => Ok(Token::DIV),
-                    '(' => Ok(Token::LPAREN),
-                    ')' => Ok(Token::RPAREN),
-                    ',' => Ok(Token::COMMA),
-                    '.' => Ok(Token::DOT),
-                    '=' => Ok(Token::ASSIGN),
-                    ';' => Ok(Token::SEMI),
-                    _ => Err(InvalidSyntaxError::new(ch.to_string())),
+                    match ch {
+                        '+' => Ok(Token::PLUS),
+                        '-' => Ok(Token::MINUS),
+                        '*' => Ok(Token::MUL),
+                        '/' => Ok(Token::DIV),
+                        '(' => Ok(Token::LPAREN),
+                        ')' => Ok(Token::RPAREN),
+                        ',' => Ok(Token::COMMA),
+                        '.' => Ok(Token::DOT),
+                        '=' => Ok(Token::ASSIGN),
+                        ';' => Ok(Token::SEMI),
+                        _ => Err(InterpreterError::InvalidSyntax(ch.to_string())),
+                    }
                 }
-            }
-        } else {
-            Err(InvalidSyntaxError::new("eof".to_string()))
-        }
+            })
     }
 
     pub fn into_iter(self) -> TokenIterator {
         TokenIterator(self)
     }
 
-    fn consume_integer(&mut self) -> Result<Token, InvalidSyntaxError> {
+    fn next_integer(&mut self) -> Result<Token, InterpreterError> {
         let mut cur = String::new();
 
         while let Some(ch) = self.peek_char() {
@@ -83,10 +83,10 @@ impl Tokenizer {
 
         cur.parse::<i32>()
             .map(|num| Token::INTEGER(num))
-            .map_err(|_| InvalidSyntaxError::new(cur))
+            .map_err(|_| InterpreterError::InvalidSyntax(cur))
     }
 
-    fn consume_identity(&mut self) -> Result<Token, InvalidSyntaxError> {
+    fn next_identity(&mut self) -> Result<Token, InterpreterError> {
         let mut cur = String::new();
 
         while let Some(ch) = self.peek_char() {
@@ -110,9 +110,9 @@ impl Tokenizer {
         }
     }
 
-    fn skip_whitespace(&mut self) {
+    fn skip_char(&mut self) {
         while let Some(ch) = self.peek_char() {
-            if ch != ' ' {
+            if ch != ' ' && ch != '\n' {
                 break;
             }
             self.next_char();
@@ -180,20 +180,23 @@ mod tests {
 
     #[test]
     fn test_into_iter() {
-        let mut tokenizer = Tokenizer::new("1 + 2*(510   - 33 )  / 7 ").into_iter();
+        let tokenizer = Tokenizer::new("1 + 2*(510   - 33 )  / 7 ");
+        let tokens: Vec<Token> = tokenizer.into_iter().collect();
 
-        assert_eq!(tokenizer.next(), Some(Token::INTEGER(1)));
-        assert_eq!(tokenizer.next(), Some(Token::PLUS));
-        assert_eq!(tokenizer.next(), Some(Token::INTEGER(2)));
-        assert_eq!(tokenizer.next(), Some(Token::MUL));
-        assert_eq!(tokenizer.next(), Some(Token::LPAREN));
-        assert_eq!(tokenizer.next(), Some(Token::INTEGER(510)));
-        assert_eq!(tokenizer.next(), Some(Token::MINUS));
-        assert_eq!(tokenizer.next(), Some(Token::INTEGER(33)));
-        assert_eq!(tokenizer.next(), Some(Token::RPAREN));
-        assert_eq!(tokenizer.next(), Some(Token::DIV));
-        assert_eq!(tokenizer.next(), Some(Token::INTEGER(7)));
-        assert_eq!(tokenizer.next(), None);
+        assert_eq!(tokens, [
+            Token::INTEGER(1),
+            Token::PLUS,
+            Token::INTEGER(2),
+            Token::MUL,
+            Token::LPAREN,
+            Token::INTEGER(510),
+            Token::MINUS,
+            Token::INTEGER(33),
+            Token::RPAREN,
+            Token::DIV,
+            Token::INTEGER(7),
+        ]);
+
     }
 
     #[test]

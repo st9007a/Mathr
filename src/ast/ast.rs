@@ -1,5 +1,9 @@
+use std::collections::HashMap;
+
+use crate::error::InterpreterError;
+
 pub trait ASTNode {
-    fn eval(&self) -> i32;
+    fn eval(&self, symtab: &mut HashMap<String, i32>) -> Result<i32, InterpreterError>;
 }
 
 pub trait UnaryOpFunction {

@@ -24,7 +24,6 @@ statement_list : statement
                | statement SEMI statement_list
 
 statement : assignment_statement
-          | empty
 
 assignment_statement : variable ASSIGN expr
 

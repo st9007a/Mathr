@@ -1,3 +1,7 @@
+use std::collections::HashMap;
+
+use crate::error::InterpreterError;
+
 use super::ast::{ASTNode, BinaryOpFunction};
 
 pub struct DivNode {
@@ -18,7 +22,10 @@ impl BinaryOpFunction for DivNode {
 }
 
 impl ASTNode for DivNode {
-    fn eval(&self) -> i32 {
-        self.exec(self.left.eval(), self.right.eval())
+    fn eval(&self, symtab: &mut HashMap<String, i32>) -> Result<i32, InterpreterError> {
+        let left = self.left.eval(symtab)?;
+        let right = self.right.eval(symtab)?;
+
+        Ok(self.exec(left, right))
     }
 }

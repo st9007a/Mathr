@@ -4,21 +4,27 @@ use std::fmt;
 use crate::token::Token;
 
 #[derive(Debug)]
-pub struct InvalidSyntaxError {
-    content: String,
+pub enum InterpreterError {
+    InvalidSyntax(String),
+    UnexpectedToken(Token),
+    UndefinedSymbol(String),
 }
 
-impl InvalidSyntaxError {
-    pub fn new(content: String) -> Self {
-        Self { content }
-    }
-}
+impl error::Error for InterpreterError {}
 
-impl error::Error for InvalidSyntaxError {}
-
-impl fmt::Display for InvalidSyntaxError {
+impl fmt::Display for InterpreterError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "invalid syntax: {}", self.content)
+        match self {
+            InterpreterError::InvalidSyntax(syntax) => {
+                write!(f, "Invalid syntax: {}", syntax)
+            }
+            InterpreterError::UnexpectedToken(token) => {
+                write!(f, "Unexpected token: {:?}", token)
+            }
+            InterpreterError::UndefinedSymbol(symbol) => {
+                write!(f, "Undefined symbol: {}", symbol)
+            }
+        }
     }
 }
 
