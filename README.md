@@ -36,7 +36,7 @@ term: factor ((MUL | DIV) factor)*
 factor : ADD factor
        | SUB factor
        | NUMBER
-       | NUMBER DOT NUMBER
+       | float
        | LPAREN expr RPAREN
        | variable
 

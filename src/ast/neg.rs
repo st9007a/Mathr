@@ -14,13 +14,13 @@ impl NegNode {
 }
 
 impl UnaryOpFunction for NegNode {
-    fn exec(&self, a: i32) -> i32 {
+    fn exec(&self, a: f64) -> f64 {
         -a
     }
 }
 
 impl ASTNode for NegNode {
-    fn eval(&self, symtab: &mut HashMap<String, i32>) -> Result<i32, InterpreterError> {
+    fn eval(&self, symtab: &mut HashMap<String, f64>) -> Result<f64, InterpreterError> {
         let value = self.node.eval(symtab)?;
         Ok(self.exec(value))
     }

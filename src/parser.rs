@@ -91,12 +91,8 @@ impl Parser {
                     self.next_token();
                     Ok(Box::new(NegNode::new(self.factor()?)))
                 }
-                Token::INTEGER(value_str) => {
-                    let value = value_str
-                        .parse::<i32>()
-                        .map_err(|_| InterpreterError::InvalidSyntax(value_str.to_string()))?;
-
-                    let node = Box::new(NumberNode::new(value));
+                Token::NUMBER(value) => {
+                    let node = Box::new(NumberNode::new(value.clone()));
 
                     self.next_token();
                     Ok(node)
@@ -182,61 +178,61 @@ mod tests {
     #[test]
     fn test_factor_integer() {
         let mut parser = Parser::from_text(" 123   ");
-        let mut symtab: HashMap<String, i32> = HashMap::new();
+        let mut symtab: HashMap<String, f64> = HashMap::new();
         let node = parser.factor();
 
         assert!(node.is_ok());
-        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 123);
+        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 123f64);
     }
 
     #[test]
     fn test_term() {
         let mut parser = Parser::from_text("4 * 12");
-        let mut symtab: HashMap<String, i32> = HashMap::new();
+        let mut symtab: HashMap<String, f64> = HashMap::new();
         let node = parser.term();
 
         assert!(node.is_ok());
-        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 48);
+        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 48f64);
     }
 
     #[test]
     fn test_expr() {
         let mut parser = Parser::from_text("4311 + 111");
-        let mut symtab: HashMap<String, i32> = HashMap::new();
+        let mut symtab: HashMap<String, f64> = HashMap::new();
         let node = parser.expr();
 
         assert!(node.is_ok());
-        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 4422);
+        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 4422f64);
     }
 
     #[test]
     fn test_factor_parenthesis() {
         let mut parser = Parser::from_text(" ( 12 + 21)");
-        let mut symtab: HashMap<String, i32> = HashMap::new();
+        let mut symtab: HashMap<String, f64> = HashMap::new();
         let node = parser.factor();
 
         assert!(node.is_ok());
-        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 33);
+        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 33f64);
     }
 
     #[test]
     fn test_factor_unary_op() {
         let mut parser = Parser::from_text("- -   12");
-        let mut symtab: HashMap<String, i32> = HashMap::new();
+        let mut symtab: HashMap<String, f64> = HashMap::new();
         let node = parser.factor();
 
         assert!(node.is_ok());
-        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 12);
+        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 12f64);
     }
 
     #[test]
     fn test_parse() {
         let mut parser = Parser::from_text("x = 1 + 2 * (-3 - 4 / 2) + 10");
-        let mut symtab: HashMap<String, i32> = HashMap::new();
+        let mut symtab: HashMap<String, f64> = HashMap::new();
         let node = parser.parse();
 
         assert!(node.is_ok());
-        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 1);
-        assert_eq!(symtab.get("x"), Some(&1));
+        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 1f64);
+        assert_eq!(symtab.get("x"), Some(&1f64));
     }
 }

@@ -5,17 +5,17 @@ use crate::error::InterpreterError;
 use super::ast::ASTNode;
 
 pub struct NumberNode {
-    value: i32,
+    value: f64,
 }
 
 impl NumberNode {
-    pub fn new(value: i32) -> Self {
+    pub fn new(value: f64) -> Self {
         Self { value }
     }
 }
 
 impl ASTNode for NumberNode {
-    fn eval(&self, symtab: &mut HashMap<String, i32>) -> Result<i32, InterpreterError> {
+    fn eval(&self, symtab: &mut HashMap<String, f64>) -> Result<f64, InterpreterError> {
         Ok(self.value)
     }
 }

@@ -19,7 +19,7 @@ impl VarNode {
 }
 
 impl ASTNode for VarNode {
-    fn eval(&self, symtab: &mut HashMap<String, i32>) -> Result<i32, InterpreterError> {
+    fn eval(&self, symtab: &mut HashMap<String, f64>) -> Result<f64, InterpreterError> {
         symtab
             .get(&self.name)
             .map(|value| *value)

@@ -16,7 +16,7 @@ impl AssignNode {
 }
 
 impl ASTNode for AssignNode {
-    fn eval(&self, symtab: &mut HashMap<String, i32>) -> Result<i32, InterpreterError> {
+    fn eval(&self, symtab: &mut HashMap<String, f64>) -> Result<f64, InterpreterError> {
         let value = self.expr.eval(symtab)?;
 
         symtab.insert(self.var.get_name().to_string(), value);
