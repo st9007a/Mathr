@@ -9,4 +9,6 @@ pub trait ASTExpression {
     fn pure(&self) -> bool;
 
     fn eval(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError>;
+
+    fn check_symbol(&self, symtab: &SymbolTable) -> Result<(), InterpreterError>;
 }

@@ -12,6 +12,24 @@ impl AssignNode {
     pub fn new(var: Box<VarNode>, expression: Box<dyn ASTExpression>) -> Self {
         Self { var, expression }
     }
+
+    pub fn check_semantic(&self, symtab: &mut SymbolTable) -> Result<(), InterpreterError> {
+        if !self.expression.pure() {
+            let res = self.expression.check_symbol(symtab);
+
+            if res.is_err() {
+                return res;
+            }
+        }
+
+        if symtab.is_global(self.var.name()) {
+            Err(InterpreterError::RedefineBuiltinSymbol(
+                self.var.name().clone(),
+            ))
+        } else {
+            Ok(())
+        }
+    }
 }
 
 impl ASTNode for AssignNode {

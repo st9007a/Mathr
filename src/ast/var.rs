@@ -32,8 +32,15 @@ impl ASTExpression for VarNode {
 
     fn eval(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
         symtab
-            .get(&self.name)
+            .get(self.name())
             .map(|value| *value)
-            .ok_or(InterpreterError::UndefinedSymbol(self.name.clone()))
+            .ok_or(InterpreterError::UndefinedSymbol(self.name().clone()))
+    }
+
+    fn check_symbol(&self, symtab: &SymbolTable) -> Result<(), InterpreterError> {
+        symtab
+            .get(self.name())
+            .map(|_| ())
+            .ok_or(InterpreterError::UndefinedSymbol(self.name().clone()))
     }
 }

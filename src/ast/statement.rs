@@ -11,6 +11,18 @@ impl StatementListNode {
     pub fn new(nodes: Vec<Box<AssignNode>>) -> Self {
         Self { nodes }
     }
+
+    pub fn check_semantic(&self, symtab: &mut SymbolTable) -> Result<(), InterpreterError> {
+        for node in self.nodes.iter() {
+            let res = node.check_semantic(symtab);
+
+            if res.is_err() {
+                return res;
+            }
+        }
+
+        Ok(())
+    }
 }
 
 impl ASTNode for StatementListNode {

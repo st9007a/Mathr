@@ -27,4 +27,8 @@ impl ASTExpression for NumberNode {
     fn eval(&self, _symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
         Ok(self.value)
     }
+
+    fn check_symbol(&self, symtab: &SymbolTable) -> Result<(), InterpreterError> {
+        Ok(())
+    }
 }

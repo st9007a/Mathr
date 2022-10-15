@@ -38,4 +38,12 @@ impl ASTExpression for UnaryOpNode {
             UnaryOpType::MINUS => Ok(-value),
         }
     }
+
+    fn check_symbol(&self, symtab: &SymbolTable) -> Result<(), InterpreterError> {
+        if self.node.pure() {
+            Ok(())
+        } else {
+            self.check_symbol(symtab)
+        }
+    }
 }

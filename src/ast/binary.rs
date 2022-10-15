@@ -52,4 +52,17 @@ impl ASTExpression for BinaryOpNode {
             BinaryOpType::DIV => Ok(left / right),
         }
     }
+
+    fn check_symbol(&self, symtab: &SymbolTable) -> Result<(), InterpreterError> {
+        let mut res = Ok(());
+
+        if !self.left.pure() {
+            res = res.and(self.left.check_symbol(symtab));
+        }
+        if !self.right.pure() {
+            res = res.and(self.right.check_symbol(symtab));
+        }
+
+        res
+    }
 }
