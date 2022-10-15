@@ -2,8 +2,8 @@ use std::iter::Peekable;
 use std::vec::IntoIter;
 
 use crate::ast::{
-    ASTNode, AddNode, AssignNode, DivNode, MulNode, NegNode, NumberNode, PosNode,
-    StatementListNode, SubNode, VarNode,
+    ASTNode, AssignNode, BinaryOpNode, BinaryOpType, NumberNode, UnaryOpNode, UnaryOpType,
+    StatementListNode, VarNode,
 };
 use crate::error::InterpreterError;
 use crate::token::Token;
@@ -74,11 +74,11 @@ impl Parser {
             match token {
                 Token::PLUS => {
                     self.next_token();
-                    Ok(Box::new(PosNode::new(self.factor()?)))
+                    Ok(Box::new(UnaryOpNode::new(self.factor()?, UnaryOpType::PLUS)))
                 }
                 Token::MINUS => {
                     self.next_token();
-                    Ok(Box::new(NegNode::new(self.factor()?)))
+                    Ok(Box::new(UnaryOpNode::new(self.factor()?, UnaryOpType::MINUS)))
                 }
                 Token::NUMBER(value) => {
                     let node = Box::new(NumberNode::new(value.clone()));
@@ -111,11 +111,11 @@ impl Parser {
             match token {
                 Token::MUL => {
                     self.next_token();
-                    left = Box::new(MulNode::new(left, self.factor()?));
+                    left = Box::new(BinaryOpNode::new(left, self.factor()?, BinaryOpType::MUL));
                 }
                 Token::DIV => {
                     self.next_token();
-                    left = Box::new(DivNode::new(left, self.factor()?));
+                    left = Box::new(BinaryOpNode::new(left, self.factor()?, BinaryOpType::DIV));
                 }
                 _ => {
                     break;
@@ -133,11 +133,11 @@ impl Parser {
             match token {
                 Token::PLUS => {
                     self.next_token();
-                    left = Box::new(AddNode::new(left, self.term()?));
+                    left = Box::new(BinaryOpNode::new(left, self.term()?, BinaryOpType::ADD));
                 }
                 Token::MINUS => {
                     self.next_token();
-                    left = Box::new(SubNode::new(left, self.term()?));
+                    left = Box::new(BinaryOpNode::new(left, self.term()?, BinaryOpType::SUB));
                 }
                 _ => {
                     break;
