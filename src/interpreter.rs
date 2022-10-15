@@ -1,25 +1,18 @@
-use std::collections::HashMap;
-use std::f64::consts;
-
 use crate::ast::{ASTNode, StatementListNode};
 use crate::error::InterpreterError;
 use crate::parser::Parser;
+use crate::symbol_table::SymbolTable;
 use crate::tokenizer::Tokenizer;
 
 pub struct Interpreter {
-    symtab: HashMap<String, f64>,
+    symtab: SymbolTable,
     nodes: Vec<Box<StatementListNode>>,
 }
 
 impl Interpreter {
     pub fn new() -> Self {
-        let mut symtab: HashMap<String, f64> = HashMap::new();
-
-        symtab.insert("e".to_string(), consts::E);
-        symtab.insert("pi".to_string(), consts::PI);
-
         Self {
-            symtab,
+            symtab: SymbolTable::new(),
             nodes: vec![],
         }
     }
@@ -37,8 +30,6 @@ impl Interpreter {
     pub fn clear_state(&mut self) {
         self.nodes.clear();
         self.symtab.clear();
-        self.symtab.insert("e".to_string(), consts::E);
-        self.symtab.insert("pi".to_string(), consts::PI);
     }
 
     pub fn query(&self, symbol: &String) -> Option<&f64> {

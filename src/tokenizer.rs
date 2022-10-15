@@ -108,20 +108,10 @@ impl Tokenizer {
                 break;
             }
 
-            if cur.eq("e") && ch.is_ascii_digit() {
-                return Ok(Token::E);
-            }
-
             cur.push(self.next_char().unwrap());
         }
 
-        if cur.eq("e") {
-            Ok(Token::E)
-        } else if cur.eq("pi") {
-            Ok(Token::PI)
-        } else {
-            Ok(Token::ID(cur))
-        }
+        Ok(Token::ID(cur))
     }
 
     fn skip_char(&mut self) {
@@ -200,7 +190,7 @@ mod tests {
                 Token::NUMBER(7.5),
                 Token::PLUS,
                 Token::LPAREN,
-                Token::E,
+                Token::ID("e".to_string()),
                 Token::MUL,
                 Token::ID("my_var".to_string()),
                 Token::RPAREN,

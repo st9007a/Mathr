@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use crate::error::InterpreterError;
+use crate::symbol_table::SymbolTable;
 
 use super::{ASTExpression, ASTNode};
 
@@ -19,7 +20,7 @@ impl VarNode {
 }
 
 impl ASTNode for VarNode {
-    fn execute(&self, symtab: &mut HashMap<String, f64>) -> Result<f64, InterpreterError> {
+    fn execute(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
         self.eval(symtab)
     }
 }
@@ -29,7 +30,7 @@ impl ASTExpression for VarNode {
         false
     }
 
-    fn eval(&self, symtab: &mut HashMap<String, f64>) -> Result<f64, InterpreterError> {
+    fn eval(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
         symtab
             .get(&self.name)
             .map(|value| *value)

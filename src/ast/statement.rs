@@ -1,6 +1,5 @@
-use std::collections::HashMap;
-
 use crate::error::InterpreterError;
+use crate::symbol_table::SymbolTable;
 
 use super::{ASTNode, AssignNode};
 
@@ -15,7 +14,7 @@ impl StatementListNode {
 }
 
 impl ASTNode for StatementListNode {
-    fn execute(&self, symtab: &mut HashMap<String, f64>) -> Result<f64, InterpreterError> {
+    fn execute(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
         let mut value: f64 = 0.;
 
         for node in self.nodes.iter() {

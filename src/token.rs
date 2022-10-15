@@ -11,7 +11,5 @@ pub enum Token {
     COMMA,
     DOT,
     ASSIGN,
-    PI,
-    E,
     SEMI,
 }
