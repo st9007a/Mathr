@@ -1,6 +1,5 @@
-use std::collections::HashMap;
-
 use crate::error::InterpreterError;
+use crate::symbol_table::SymbolTable;
 
 use super::{ASTExpression, ASTNode, VarNode};
 
@@ -16,7 +15,7 @@ impl AssignNode {
 }
 
 impl ASTNode for AssignNode {
-    fn execute(&self, symtab: &mut HashMap<String, f64>) -> Result<f64, InterpreterError> {
+    fn execute(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
         let value = self.expression.eval(symtab)?;
 
         symtab.insert(self.var.name().to_string(), value);

@@ -1,6 +1,5 @@
-use std::collections::HashMap;
-
 use crate::error::InterpreterError;
+use crate::symbol_table::SymbolTable;
 
 use super::{ASTExpression, ASTNode};
 
@@ -21,7 +20,7 @@ impl UnaryOpNode {
 }
 
 impl ASTNode for UnaryOpNode {
-    fn execute(&self, symtab: &mut HashMap<String, f64>) -> Result<f64, InterpreterError> {
+    fn execute(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
         self.eval(symtab)
     }
 }
@@ -31,7 +30,7 @@ impl ASTExpression for UnaryOpNode {
         self.node.pure()
     }
 
-    fn eval(&self, symtab: &mut HashMap<String, f64>) -> Result<f64, InterpreterError> {
+    fn eval(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
         let value = self.node.eval(symtab)?;
 
         match self.op_type {

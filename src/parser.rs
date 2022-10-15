@@ -26,8 +26,6 @@ impl Parser {
     pub fn variable(&mut self) -> Result<Box<VarNode>, InterpreterError> {
         if let Some(token) = self.next_token() {
             match token {
-                Token::PI => Ok(Box::new(VarNode::new("pi".to_string()))),
-                Token::E => Ok(Box::new(VarNode::new("e".to_string()))),
                 Token::ID(value) => Ok(Box::new(VarNode::new(value.to_string()))),
                 _ => Err(InterpreterError::EOF),
             }
@@ -165,9 +163,8 @@ impl Parser {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
     use crate::ast::ASTNode;
+    use crate::symbol_table::SymbolTable;
     use crate::token::Token;
 
     use super::Parser;
@@ -176,7 +173,7 @@ mod tests {
     fn test_factor_integer() {
         let tokens = vec![Token::NUMBER(123.)];
         let mut parser = Parser::new(tokens);
-        let mut symtab: HashMap<String, f64> = HashMap::new();
+        let mut symtab = SymbolTable::new();
         let expression = parser.factor();
 
         assert!(expression.is_ok());
@@ -187,7 +184,7 @@ mod tests {
     fn test_term() {
         let tokens = vec![Token::NUMBER(4.), Token::MUL, Token::NUMBER(12.)];
         let mut parser = Parser::new(tokens);
-        let mut symtab: HashMap<String, f64> = HashMap::new();
+        let mut symtab = SymbolTable::new();
         let expression = parser.term();
 
         assert!(expression.is_ok());
@@ -198,7 +195,7 @@ mod tests {
     fn test_expr() {
         let tokens = vec![Token::NUMBER(4311.), Token::PLUS, Token::NUMBER(111.)];
         let mut parser = Parser::new(tokens);
-        let mut symtab: HashMap<String, f64> = HashMap::new();
+        let mut symtab = SymbolTable::new();
         let expression = parser.expr();
 
         assert!(expression.is_ok());
@@ -215,7 +212,7 @@ mod tests {
             Token::RPAREN,
         ];
         let mut parser = Parser::new(tokens);
-        let mut symtab: HashMap<String, f64> = HashMap::new();
+        let mut symtab = SymbolTable::new();
         let expression = parser.factor();
 
         assert!(expression.is_ok());
@@ -226,7 +223,7 @@ mod tests {
     fn test_factor_unary_op() {
         let tokens = vec![Token::PLUS, Token::PLUS, Token::NUMBER(12.)];
         let mut parser = Parser::new(tokens);
-        let mut symtab: HashMap<String, f64> = HashMap::new();
+        let mut symtab = SymbolTable::new();
         let expression = parser.factor();
 
         assert!(expression.is_ok());
@@ -254,11 +251,13 @@ mod tests {
             Token::NUMBER(10.),
         ];
         let mut parser = Parser::new(tokens);
-        let mut symtab: HashMap<String, f64> = HashMap::new();
+        let mut symtab = SymbolTable::new();
         let node = parser.parse();
+
+        let x = "x".to_string();
 
         assert!(node.is_ok());
         assert_eq!(node.unwrap().execute(&mut symtab).unwrap(), 1f64);
-        assert_eq!(symtab.get("x"), Some(&1f64));
+        assert_eq!(symtab.get(&x), Some(&1f64));
     }
 }
