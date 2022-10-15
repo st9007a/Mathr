@@ -1,7 +1,7 @@
 use crate::error::InterpreterError;
 use crate::symbol_table::SymbolTable;
 
-use super::{ASTNode, AssignNode};
+use super::{ASTNode, ASTSemanticAnalysis, ASTStatement, AssignNode};
 
 pub struct StatementListNode {
     nodes: Vec<Box<AssignNode>>,
@@ -13,7 +13,7 @@ impl StatementListNode {
     }
 }
 
-impl ASTNode for StatementListNode {
+impl ASTStatement for StatementListNode {
     fn execute(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
         let mut value: f64 = 0.;
 
@@ -22,5 +22,21 @@ impl ASTNode for StatementListNode {
         }
 
         Ok(value)
+    }
+}
+
+impl ASTNode for StatementListNode {}
+
+impl ASTSemanticAnalysis for StatementListNode {
+    fn check_semantic(&self, symtab: &mut SymbolTable) -> Result<(), InterpreterError> {
+        for node in self.nodes.iter() {
+            let res = node.check_semantic(symtab);
+
+            if res.is_err() {
+                return res;
+            }
+        }
+
+        Ok(())
     }
 }

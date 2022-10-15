@@ -30,4 +30,8 @@ impl SymbolTable {
     pub fn insert(&mut self, symbol: String, value: f64) {
         self.local.insert(symbol, value);
     }
+
+    pub fn is_global(&self, symbol: &String) -> bool {
+        self.global.get(symbol).is_some()
+    }
 }

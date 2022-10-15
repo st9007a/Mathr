@@ -1,7 +1,7 @@
 use crate::error::InterpreterError;
 use crate::symbol_table::SymbolTable;
 
-use super::{ASTExpression, ASTNode};
+use super::{ASTExpression, ASTNode, ASTSemanticAnalysis};
 
 pub struct NumberNode {
     value: f64,
@@ -13,11 +13,7 @@ impl NumberNode {
     }
 }
 
-impl ASTNode for NumberNode {
-    fn execute(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
-        self.eval(symtab)
-    }
-}
+impl ASTNode for NumberNode {}
 
 impl ASTExpression for NumberNode {
     fn pure(&self) -> bool {
@@ -26,5 +22,11 @@ impl ASTExpression for NumberNode {
 
     fn eval(&self, _symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
         Ok(self.value)
+    }
+}
+
+impl ASTSemanticAnalysis for NumberNode {
+    fn check_semantic(&self, symtab: &mut SymbolTable) -> Result<(), InterpreterError> {
+        Ok(())
     }
 }

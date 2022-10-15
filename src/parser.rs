@@ -2,7 +2,7 @@ use std::iter::Peekable;
 use std::vec::IntoIter;
 
 use crate::ast::{
-    ASTExpression, AssignNode, BinaryOpNode, BinaryOpType, NumberNode, StatementListNode,
+    ASTSemanticExpression, AssignNode, BinaryOpNode, BinaryOpType, NumberNode, StatementListNode,
     UnaryOpNode, UnaryOpType, VarNode,
 };
 use crate::error::InterpreterError;
@@ -67,7 +67,7 @@ impl Parser {
         Ok(Box::new(StatementListNode::new(nodes)))
     }
 
-    pub fn factor(&mut self) -> Result<Box<dyn ASTExpression>, InterpreterError> {
+    pub fn factor(&mut self) -> Result<Box<dyn ASTSemanticExpression>, InterpreterError> {
         if let Some(token) = self.peek_token() {
             match token {
                 Token::PLUS => {
@@ -101,14 +101,16 @@ impl Parser {
                             _ => Err(InterpreterError::UnexpectedToken(next_token)),
                         })
                 }
-                _ => self.variable().map(|node| node as Box<dyn ASTExpression>),
+                _ => self
+                    .variable()
+                    .map(|node| node as Box<dyn ASTSemanticExpression>),
             }
         } else {
             Err(InterpreterError::EOF)
         }
     }
 
-    pub fn term(&mut self) -> Result<Box<dyn ASTExpression>, InterpreterError> {
+    pub fn term(&mut self) -> Result<Box<dyn ASTSemanticExpression>, InterpreterError> {
         let mut left = self.factor()?;
 
         while let Some(token) = self.peek_token() {
@@ -130,7 +132,7 @@ impl Parser {
         Ok(left)
     }
 
-    pub fn expr(&mut self) -> Result<Box<dyn ASTExpression>, InterpreterError> {
+    pub fn expr(&mut self) -> Result<Box<dyn ASTSemanticExpression>, InterpreterError> {
         let mut left = self.term()?;
 
         while let Some(token) = self.peek_token() {
@@ -163,7 +165,7 @@ impl Parser {
 
 #[cfg(test)]
 mod tests {
-    use crate::ast::ASTNode;
+    use crate::ast::ASTStatement;
     use crate::symbol_table::SymbolTable;
     use crate::token::Token;
 

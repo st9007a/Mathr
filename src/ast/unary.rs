@@ -1,7 +1,7 @@
 use crate::error::InterpreterError;
 use crate::symbol_table::SymbolTable;
 
-use super::{ASTExpression, ASTNode};
+use super::{ASTExpression, ASTNode, ASTSemanticAnalysis, ASTSemanticExpression};
 
 pub enum UnaryOpType {
     PLUS,
@@ -9,21 +9,17 @@ pub enum UnaryOpType {
 }
 
 pub struct UnaryOpNode {
-    node: Box<dyn ASTExpression>,
+    node: Box<dyn ASTSemanticExpression>,
     op_type: UnaryOpType,
 }
 
 impl UnaryOpNode {
-    pub fn new(node: Box<dyn ASTExpression>, op_type: UnaryOpType) -> Self {
+    pub fn new(node: Box<dyn ASTSemanticExpression>, op_type: UnaryOpType) -> Self {
         Self { node, op_type }
     }
 }
 
-impl ASTNode for UnaryOpNode {
-    fn execute(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
-        self.eval(symtab)
-    }
-}
+impl ASTNode for UnaryOpNode {}
 
 impl ASTExpression for UnaryOpNode {
     fn pure(&self) -> bool {
@@ -36,6 +32,16 @@ impl ASTExpression for UnaryOpNode {
         match self.op_type {
             UnaryOpType::PLUS => Ok(value),
             UnaryOpType::MINUS => Ok(-value),
+        }
+    }
+}
+
+impl ASTSemanticAnalysis for UnaryOpNode {
+    fn check_semantic(&self, symtab: &mut SymbolTable) -> Result<(), InterpreterError> {
+        if self.node.pure() {
+            Ok(())
+        } else {
+            self.check_semantic(symtab)
         }
     }
 }

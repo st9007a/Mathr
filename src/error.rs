@@ -8,6 +8,7 @@ pub enum InterpreterError {
     InvalidSyntax(String),
     UnexpectedToken(Token),
     UndefinedSymbol(String),
+    RedefineBuiltinSymbol(String),
     EOF,
 }
 
@@ -25,28 +26,12 @@ impl fmt::Display for InterpreterError {
             InterpreterError::UndefinedSymbol(symbol) => {
                 write!(f, "Undefined symbol: {}", symbol)
             }
+            InterpreterError::RedefineBuiltinSymbol(symbol) => {
+                write!(f, "Redefine builtin symbol: {}", symbol)
+            }
             InterpreterError::EOF => {
                 write!(f, "End of file.")
             }
         }
-    }
-}
-
-#[derive(Debug)]
-pub struct UnexpectedTokenError {
-    token: Token,
-}
-
-impl UnexpectedTokenError {
-    pub fn new(token: Token) -> Self {
-        Self { token }
-    }
-}
-
-impl error::Error for UnexpectedTokenError {}
-
-impl fmt::Display for UnexpectedTokenError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Unexpected token: {:?}", self.token)
     }
 }
