@@ -1,9 +1,7 @@
-use std::collections::HashMap;
-
 use crate::error::InterpreterError;
 use crate::symbol_table::SymbolTable;
 
-use super::{ASTExpression, ASTNode};
+use super::{ASTExpression, ASTNode, ASTSemanticAnalysis};
 
 pub struct VarNode {
     name: String,
@@ -19,11 +17,7 @@ impl VarNode {
     }
 }
 
-impl ASTNode for VarNode {
-    fn execute(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
-        self.eval(symtab)
-    }
-}
+impl ASTNode for VarNode {}
 
 impl ASTExpression for VarNode {
     fn pure(&self) -> bool {
@@ -36,8 +30,10 @@ impl ASTExpression for VarNode {
             .map(|value| *value)
             .ok_or(InterpreterError::UndefinedSymbol(self.name().clone()))
     }
+}
 
-    fn check_symbol(&self, symtab: &SymbolTable) -> Result<(), InterpreterError> {
+impl ASTSemanticAnalysis for VarNode {
+    fn check_semantic(&self, symtab: &mut SymbolTable) -> Result<(), InterpreterError> {
         symtab
             .get(self.name())
             .map(|_| ())

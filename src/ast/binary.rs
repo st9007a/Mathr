@@ -1,7 +1,7 @@
 use crate::error::InterpreterError;
 use crate::symbol_table::SymbolTable;
 
-use super::{ASTExpression, ASTNode};
+use super::{ASTExpression, ASTNode, ASTSemanticAnalysis, ASTSemanticExpression};
 
 pub enum BinaryOpType {
     ADD,
@@ -11,15 +11,15 @@ pub enum BinaryOpType {
 }
 
 pub struct BinaryOpNode {
-    left: Box<dyn ASTExpression>,
-    right: Box<dyn ASTExpression>,
+    left: Box<dyn ASTSemanticExpression>,
+    right: Box<dyn ASTSemanticExpression>,
     op_type: BinaryOpType,
 }
 
 impl BinaryOpNode {
     pub fn new(
-        left: Box<dyn ASTExpression>,
-        right: Box<dyn ASTExpression>,
+        left: Box<dyn ASTSemanticExpression>,
+        right: Box<dyn ASTSemanticExpression>,
         op_type: BinaryOpType,
     ) -> Self {
         Self {
@@ -30,11 +30,7 @@ impl BinaryOpNode {
     }
 }
 
-impl ASTNode for BinaryOpNode {
-    fn execute(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
-        self.eval(symtab)
-    }
-}
+impl ASTNode for BinaryOpNode {}
 
 impl ASTExpression for BinaryOpNode {
     fn pure(&self) -> bool {
@@ -52,15 +48,17 @@ impl ASTExpression for BinaryOpNode {
             BinaryOpType::DIV => Ok(left / right),
         }
     }
+}
 
-    fn check_symbol(&self, symtab: &SymbolTable) -> Result<(), InterpreterError> {
+impl ASTSemanticAnalysis for BinaryOpNode {
+    fn check_semantic(&self, symtab: &mut SymbolTable) -> Result<(), InterpreterError> {
         let mut res = Ok(());
 
         if !self.left.pure() {
-            res = res.and(self.left.check_symbol(symtab));
+            res = res.and(self.left.check_semantic(symtab));
         }
         if !self.right.pure() {
-            res = res.and(self.right.check_symbol(symtab));
+            res = res.and(self.right.check_semantic(symtab));
         }
 
         res

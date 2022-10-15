@@ -1,4 +1,4 @@
-use crate::ast::{ASTNode, StatementListNode};
+use crate::ast::{ASTStatement, StatementListNode, ASTSemanticAnalysis};
 use crate::error::InterpreterError;
 use crate::parser::Parser;
 use crate::symbol_table::SymbolTable;
