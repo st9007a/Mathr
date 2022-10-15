@@ -2,8 +2,8 @@ use std::iter::Peekable;
 use std::vec::IntoIter;
 
 use crate::ast::{
-    ASTNode, AssignNode, BinaryOpNode, BinaryOpType, NumberNode, UnaryOpNode, UnaryOpType,
-    StatementListNode, VarNode,
+    ASTExpression, AssignNode, BinaryOpNode, BinaryOpType, NumberNode, StatementListNode,
+    UnaryOpNode, UnaryOpType, VarNode,
 };
 use crate::error::InterpreterError;
 use crate::token::Token;
@@ -69,16 +69,22 @@ impl Parser {
         Ok(Box::new(StatementListNode::new(nodes)))
     }
 
-    pub fn factor(&mut self) -> Result<Box<dyn ASTNode>, InterpreterError> {
+    pub fn factor(&mut self) -> Result<Box<dyn ASTExpression>, InterpreterError> {
         if let Some(token) = self.peek_token() {
             match token {
                 Token::PLUS => {
                     self.next_token();
-                    Ok(Box::new(UnaryOpNode::new(self.factor()?, UnaryOpType::PLUS)))
+                    Ok(Box::new(UnaryOpNode::new(
+                        self.factor()?,
+                        UnaryOpType::PLUS,
+                    )))
                 }
                 Token::MINUS => {
                     self.next_token();
-                    Ok(Box::new(UnaryOpNode::new(self.factor()?, UnaryOpType::MINUS)))
+                    Ok(Box::new(UnaryOpNode::new(
+                        self.factor()?,
+                        UnaryOpType::MINUS,
+                    )))
                 }
                 Token::NUMBER(value) => {
                     let node = Box::new(NumberNode::new(value.clone()));
@@ -97,14 +103,14 @@ impl Parser {
                             _ => Err(InterpreterError::UnexpectedToken(next_token)),
                         })
                 }
-                _ => self.variable().map(|node| node as Box<dyn ASTNode>),
+                _ => self.variable().map(|node| node as Box<dyn ASTExpression>),
             }
         } else {
             Err(InterpreterError::EOF)
         }
     }
 
-    pub fn term(&mut self) -> Result<Box<dyn ASTNode>, InterpreterError> {
+    pub fn term(&mut self) -> Result<Box<dyn ASTExpression>, InterpreterError> {
         let mut left = self.factor()?;
 
         while let Some(token) = self.peek_token() {
@@ -126,7 +132,7 @@ impl Parser {
         Ok(left)
     }
 
-    pub fn expr(&mut self) -> Result<Box<dyn ASTNode>, InterpreterError> {
+    pub fn expr(&mut self) -> Result<Box<dyn ASTExpression>, InterpreterError> {
         let mut left = self.term()?;
 
         while let Some(token) = self.peek_token() {
@@ -171,10 +177,10 @@ mod tests {
         let tokens = vec![Token::NUMBER(123.)];
         let mut parser = Parser::new(tokens);
         let mut symtab: HashMap<String, f64> = HashMap::new();
-        let node = parser.factor();
+        let expression = parser.factor();
 
-        assert!(node.is_ok());
-        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 123f64);
+        assert!(expression.is_ok());
+        assert_eq!(expression.unwrap().eval(&mut symtab).unwrap(), 123f64);
     }
 
     #[test]
@@ -182,10 +188,10 @@ mod tests {
         let tokens = vec![Token::NUMBER(4.), Token::MUL, Token::NUMBER(12.)];
         let mut parser = Parser::new(tokens);
         let mut symtab: HashMap<String, f64> = HashMap::new();
-        let node = parser.term();
+        let expression = parser.term();
 
-        assert!(node.is_ok());
-        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 48f64);
+        assert!(expression.is_ok());
+        assert_eq!(expression.unwrap().eval(&mut symtab).unwrap(), 48f64);
     }
 
     #[test]
@@ -193,10 +199,10 @@ mod tests {
         let tokens = vec![Token::NUMBER(4311.), Token::PLUS, Token::NUMBER(111.)];
         let mut parser = Parser::new(tokens);
         let mut symtab: HashMap<String, f64> = HashMap::new();
-        let node = parser.expr();
+        let expression = parser.expr();
 
-        assert!(node.is_ok());
-        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 4422f64);
+        assert!(expression.is_ok());
+        assert_eq!(expression.unwrap().eval(&mut symtab).unwrap(), 4422f64);
     }
 
     #[test]
@@ -210,10 +216,10 @@ mod tests {
         ];
         let mut parser = Parser::new(tokens);
         let mut symtab: HashMap<String, f64> = HashMap::new();
-        let node = parser.factor();
+        let expression = parser.factor();
 
-        assert!(node.is_ok());
-        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 33f64);
+        assert!(expression.is_ok());
+        assert_eq!(expression.unwrap().eval(&mut symtab).unwrap(), 33f64);
     }
 
     #[test]
@@ -221,10 +227,10 @@ mod tests {
         let tokens = vec![Token::PLUS, Token::PLUS, Token::NUMBER(12.)];
         let mut parser = Parser::new(tokens);
         let mut symtab: HashMap<String, f64> = HashMap::new();
-        let node = parser.factor();
+        let expression = parser.factor();
 
-        assert!(node.is_ok());
-        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 12f64);
+        assert!(expression.is_ok());
+        assert_eq!(expression.unwrap().eval(&mut symtab).unwrap(), 12f64);
     }
 
     #[test]
@@ -252,7 +258,7 @@ mod tests {
         let node = parser.parse();
 
         assert!(node.is_ok());
-        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 1f64);
+        assert_eq!(node.unwrap().execute(&mut symtab).unwrap(), 1f64);
         assert_eq!(symtab.get("x"), Some(&1f64));
     }
 }

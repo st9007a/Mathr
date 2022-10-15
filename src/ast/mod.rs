@@ -7,7 +7,7 @@ mod unary;
 mod var;
 
 pub use assign::AssignNode;
-pub use ast::ASTNode;
+pub use ast::{ASTNode, ASTExpression};
 pub use binary::{BinaryOpNode, BinaryOpType};
 pub use number::NumberNode;
 pub use statement::StatementListNode;

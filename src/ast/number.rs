@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::error::InterpreterError;
 
-use super::ast::ASTNode;
+use super::{ASTExpression, ASTNode};
 
 pub struct NumberNode {
     value: f64,
@@ -15,7 +15,17 @@ impl NumberNode {
 }
 
 impl ASTNode for NumberNode {
-    fn eval(&self, symtab: &mut HashMap<String, f64>) -> Result<f64, InterpreterError> {
+    fn execute(&self, symtab: &mut HashMap<String, f64>) -> Result<f64, InterpreterError> {
+        self.eval(symtab)
+    }
+}
+
+impl ASTExpression for NumberNode {
+    fn pure(&self) -> bool {
+        true
+    }
+
+    fn eval(&self, _symtab: &mut HashMap<String, f64>) -> Result<f64, InterpreterError> {
         Ok(self.value)
     }
 }

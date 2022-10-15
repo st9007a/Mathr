@@ -28,7 +28,7 @@ impl Interpreter {
         let tokens = Tokenizer::new(content).try_collect()?;
         let statement_list_node = Parser::new(tokens).parse()?;
 
-        let value = statement_list_node.eval(&mut self.symtab)?;
+        let value = statement_list_node.execute(&mut self.symtab)?;
         self.nodes.push(statement_list_node);
 
         Ok(value)
