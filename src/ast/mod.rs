@@ -1,23 +1,15 @@
-mod add;
 mod assign;
 mod ast;
-mod div;
-mod mul;
-mod neg;
+mod binary;
 mod number;
-mod pos;
 mod statement;
-mod sub;
+mod unary;
 mod var;
 
-pub use add::AddNode;
 pub use assign::AssignNode;
 pub use ast::ASTNode;
-pub use div::DivNode;
-pub use mul::MulNode;
-pub use neg::NegNode;
+pub use binary::{BinaryOpNode, BinaryOpType};
 pub use number::NumberNode;
-pub use pos::PosNode;
 pub use statement::StatementListNode;
-pub use sub::SubNode;
+pub use unary::{UnaryOpNode, UnaryOpType};
 pub use var::VarNode;
