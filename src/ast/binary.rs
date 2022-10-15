@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::error::InterpreterError;
 
-use super::ASTExpression;
+use super::{ASTExpression, ASTNode};
 
 pub enum BinaryOpType {
     ADD,
@@ -28,6 +28,12 @@ impl BinaryOpNode {
             right,
             op_type,
         }
+    }
+}
+
+impl ASTNode for BinaryOpNode {
+    fn execute(&self, symtab: &mut HashMap<String, f64>) -> Result<f64, InterpreterError> {
+        self.eval(symtab)
     }
 }
 

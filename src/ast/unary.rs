@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::error::InterpreterError;
 
-use super::ASTExpression;
+use super::{ASTExpression, ASTNode};
 
 pub enum UnaryOpType {
     PLUS,
@@ -17,6 +17,12 @@ pub struct UnaryOpNode {
 impl UnaryOpNode {
     pub fn new(node: Box<dyn ASTExpression>, op_type: UnaryOpType) -> Self {
         Self { node, op_type }
+    }
+}
+
+impl ASTNode for UnaryOpNode {
+    fn execute(&self, symtab: &mut HashMap<String, f64>) -> Result<f64, InterpreterError> {
+        self.eval(symtab)
     }
 }
 
