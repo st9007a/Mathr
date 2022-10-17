@@ -39,6 +39,7 @@ impl SymbolTable {
 #[cfg(test)]
 mod tests {
     use std::f64::consts;
+
     use super::SymbolTable;
 
     #[test]
