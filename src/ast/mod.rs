@@ -6,6 +6,8 @@ mod statement;
 mod unary;
 mod var;
 
+pub mod tests;
+
 pub use assign::AssignNode;
 pub use ast::{
     ASTExpression, ASTNode, ASTSemanticAnalysis, ASTSemanticExpression, ASTSemanticStatement,
