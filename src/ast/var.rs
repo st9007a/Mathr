@@ -17,18 +17,18 @@ impl VarNode {
     }
 }
 
-impl ASTNode for VarNode {}
-
-impl ASTExpression for VarNode {
-    fn pure(&self) -> bool {
-        false
-    }
-
+impl ASTNode for VarNode {
     fn eval(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
         symtab
             .get(self.name())
             .map(|value| *value)
             .ok_or(InterpreterError::UndefinedSymbol(self.name().clone()))
+    }
+}
+
+impl ASTExpression for VarNode {
+    fn pure(&self) -> bool {
+        false
     }
 }
 
@@ -45,15 +45,13 @@ impl ASTSemanticAnalysis for VarNode {
 mod tests {
     use crate::symbol_table::SymbolTable;
 
-    use super::ASTExpression;
-    use super::ASTSemanticAnalysis;
-    use super::VarNode;
+    use super::{ASTExpression, ASTNode, ASTSemanticAnalysis, VarNode};
 
     #[test]
     fn test_eval() {
         let mut symtab = SymbolTable::new();
         let node = VarNode::new("x".to_string());
-    
+
         symtab.insert("x".to_string(), 25.);
 
         let result = node.eval(&mut symtab);

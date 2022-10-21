@@ -13,15 +13,15 @@ impl NumberNode {
     }
 }
 
-impl ASTNode for NumberNode {}
+impl ASTNode for NumberNode {
+    fn eval(&self, _symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
+        Ok(self.value)
+    }
+}
 
 impl ASTExpression for NumberNode {
     fn pure(&self) -> bool {
         true
-    }
-
-    fn eval(&self, _symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
-        Ok(self.value)
     }
 }
 
@@ -35,9 +35,7 @@ impl ASTSemanticAnalysis for NumberNode {
 mod tests {
     use crate::symbol_table::SymbolTable;
 
-    use super::ASTExpression;
-    use super::ASTSemanticAnalysis;
-    use super::NumberNode;
+    use super::{ASTExpression, ASTNode, ASTSemanticAnalysis, NumberNode};
 
     #[test]
     fn test_eval() {

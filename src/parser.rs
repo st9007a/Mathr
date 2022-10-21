@@ -165,7 +165,7 @@ impl Parser {
 
 #[cfg(test)]
 mod tests {
-    use crate::ast::ASTStatement;
+    use crate::ast::ASTNode;
     use crate::symbol_table::SymbolTable;
     use crate::token::Token;
 
@@ -259,7 +259,7 @@ mod tests {
         let x = "x".to_string();
 
         assert!(node.is_ok());
-        assert_eq!(node.unwrap().execute(&mut symtab).unwrap(), 1f64);
+        assert_eq!(node.unwrap().eval(&mut symtab).unwrap(), 1f64);
         assert_eq!(symtab.get(&x), Some(&1f64));
     }
 }

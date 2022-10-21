@@ -11,7 +11,6 @@ pub mod tests;
 pub use assign::AssignNode;
 pub use ast::{
     ASTExpression, ASTNode, ASTSemanticAnalysis, ASTSemanticExpression, ASTSemanticStatement,
-    ASTStatement,
 };
 pub use binary::{BinaryOpNode, BinaryOpType};
 pub use number::NumberNode;

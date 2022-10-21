@@ -80,19 +80,19 @@ impl MockNode {
     }
 }
 
-impl ASTNode for MockNode {}
-
-impl ASTExpression for MockNode {
-    fn pure(&self) -> bool {
-        self.pure
-    }
-
+impl ASTNode for MockNode {
     fn eval(&self, _symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
         if self.eval_is_ok {
             Ok(self.eval_value)
         } else {
             Err(self.eval_err.clone())
         }
+    }
+}
+
+impl ASTExpression for MockNode {
+    fn pure(&self) -> bool {
+        self.pure
     }
 }
 
@@ -111,7 +111,7 @@ mod tests {
     use crate::error::InterpreterError;
     use crate::symbol_table::SymbolTable;
 
-    use super::{ASTExpression, ASTSemanticAnalysis, MockNode};
+    use super::{ASTExpression, ASTNode, ASTSemanticAnalysis, MockNode};
 
     #[test]
     fn test_eval() {

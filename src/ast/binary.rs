@@ -30,13 +30,7 @@ impl BinaryOpNode {
     }
 }
 
-impl ASTNode for BinaryOpNode {}
-
-impl ASTExpression for BinaryOpNode {
-    fn pure(&self) -> bool {
-        self.left.pure() && self.right.pure()
-    }
-
+impl ASTNode for BinaryOpNode {
     fn eval(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
         let left = self.left.eval(symtab)?;
         let right = self.right.eval(symtab)?;
@@ -47,6 +41,12 @@ impl ASTExpression for BinaryOpNode {
             BinaryOpType::MUL => Ok(left * right),
             BinaryOpType::DIV => Ok(left / right),
         }
+    }
+}
+
+impl ASTExpression for BinaryOpNode {
+    fn pure(&self) -> bool {
+        self.left.pure() && self.right.pure()
     }
 }
 
@@ -71,7 +71,7 @@ mod tests {
     use crate::error::InterpreterError;
     use crate::symbol_table::SymbolTable;
 
-    use super::{ASTExpression, ASTSemanticAnalysis, BinaryOpNode, BinaryOpType};
+    use super::{ASTExpression, ASTNode, ASTSemanticAnalysis, BinaryOpNode, BinaryOpType};
 
     #[test]
     fn test_eval_add() {

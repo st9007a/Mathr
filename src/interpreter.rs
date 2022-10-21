@@ -1,4 +1,4 @@
-use crate::ast::{ASTStatement, StatementListNode, ASTSemanticAnalysis};
+use crate::ast::{ASTNode, ASTSemanticAnalysis, StatementListNode};
 use crate::error::InterpreterError;
 use crate::parser::Parser;
 use crate::symbol_table::SymbolTable;
@@ -25,7 +25,7 @@ impl Interpreter {
 
         statement_list_node.check_semantic(&mut self.semantic_symtab)?;
 
-        let value = statement_list_node.execute(&mut self.symtab)?;
+        let value = statement_list_node.eval(&mut self.symtab)?;
         self.nodes.push(statement_list_node);
 
         Ok(value)

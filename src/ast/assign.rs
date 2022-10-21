@@ -1,7 +1,7 @@
 use crate::error::InterpreterError;
 use crate::symbol_table::SymbolTable;
 
-use super::{ASTNode, ASTSemanticAnalysis, ASTSemanticExpression, ASTStatement, VarNode};
+use super::{ASTNode, ASTSemanticAnalysis, ASTSemanticExpression, VarNode};
 
 pub struct AssignNode {
     var: Box<VarNode>,
@@ -14,8 +14,8 @@ impl AssignNode {
     }
 }
 
-impl ASTStatement for AssignNode {
-    fn execute(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
+impl ASTNode for AssignNode {
+    fn eval(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
         let value = self.expression.eval(symtab)?;
 
         symtab.insert(self.var.name().to_string(), value);
@@ -23,8 +23,6 @@ impl ASTStatement for AssignNode {
         Ok(value)
     }
 }
-
-impl ASTNode for AssignNode {}
 
 impl ASTSemanticAnalysis for AssignNode {
     fn check_semantic(&self, symtab: &mut SymbolTable) -> Result<(), InterpreterError> {

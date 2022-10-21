@@ -19,13 +19,7 @@ impl UnaryOpNode {
     }
 }
 
-impl ASTNode for UnaryOpNode {}
-
-impl ASTExpression for UnaryOpNode {
-    fn pure(&self) -> bool {
-        self.node.pure()
-    }
-
+impl ASTNode for UnaryOpNode {
     fn eval(&self, symtab: &mut SymbolTable) -> Result<f64, InterpreterError> {
         let value = self.node.eval(symtab)?;
 
@@ -33,6 +27,12 @@ impl ASTExpression for UnaryOpNode {
             UnaryOpType::PLUS => Ok(value),
             UnaryOpType::MINUS => Ok(-value),
         }
+    }
+}
+
+impl ASTExpression for UnaryOpNode {
+    fn pure(&self) -> bool {
+        self.node.pure()
     }
 }
 
@@ -52,7 +52,7 @@ mod tests {
     use crate::error::InterpreterError;
     use crate::symbol_table::SymbolTable;
 
-    use super::{ASTExpression, ASTSemanticAnalysis, UnaryOpNode, UnaryOpType};
+    use super::{ASTExpression, ASTNode, ASTSemanticAnalysis, UnaryOpNode, UnaryOpType};
 
     #[test]
     fn test_eval_plus() {
