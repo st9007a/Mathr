@@ -3,7 +3,7 @@ use std::fmt;
 
 use crate::token::Token;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum InterpreterError {
     InvalidSyntax(String),
     UnexpectedToken(Token),

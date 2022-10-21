@@ -64,3 +64,133 @@ impl ASTSemanticAnalysis for BinaryOpNode {
         res
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::ast::tests::MockNode;
+    use crate::error::InterpreterError;
+    use crate::symbol_table::SymbolTable;
+
+    use super::{ASTExpression, ASTSemanticAnalysis, BinaryOpNode, BinaryOpType};
+
+    #[test]
+    fn test_eval_add() {
+        let lvalue: f64 = 32.;
+        let rvalue: f64 = 128.;
+        let mut symtab = SymbolTable::new();
+        let left = MockNode::new().expect_eval(lvalue);
+        let right = MockNode::new().expect_eval(rvalue);
+        let node = BinaryOpNode::new(Box::new(left), Box::new(right), BinaryOpType::ADD);
+        let result = node.eval(&mut symtab);
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), lvalue + rvalue);
+    }
+
+    #[test]
+    fn test_eval_sub() {
+        let lvalue: f64 = 32.;
+        let rvalue: f64 = 128.;
+        let mut symtab = SymbolTable::new();
+        let left = MockNode::new().expect_eval(lvalue);
+        let right = MockNode::new().expect_eval(rvalue);
+        let node = BinaryOpNode::new(Box::new(left), Box::new(right), BinaryOpType::SUB);
+        let result = node.eval(&mut symtab);
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), lvalue - rvalue);
+    }
+
+    #[test]
+    fn test_eval_mul() {
+        let lvalue: f64 = 32.;
+        let rvalue: f64 = 128.;
+        let mut symtab = SymbolTable::new();
+        let left = MockNode::new().expect_eval(lvalue);
+        let right = MockNode::new().expect_eval(rvalue);
+        let node = BinaryOpNode::new(Box::new(left), Box::new(right), BinaryOpType::MUL);
+        let result = node.eval(&mut symtab);
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), lvalue * rvalue);
+    }
+
+    #[test]
+    fn test_eval_div() {
+        let lvalue: f64 = 32.;
+        let rvalue: f64 = 128.;
+        let mut symtab = SymbolTable::new();
+        let left = MockNode::new().expect_eval(lvalue);
+        let right = MockNode::new().expect_eval(rvalue);
+        let node = BinaryOpNode::new(Box::new(left), Box::new(right), BinaryOpType::DIV);
+        let result = node.eval(&mut symtab);
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), lvalue / rvalue);
+    }
+
+    #[test]
+    fn test_pure() {
+        let left = MockNode::new().expect_pure(true);
+        let right = MockNode::new().expect_pure(true);
+        let node = BinaryOpNode::new(Box::new(left), Box::new(right), BinaryOpType::ADD);
+
+        assert!(node.pure());
+    }
+
+    #[test]
+    fn test_pure_left_is_false() {
+        let left = MockNode::new().expect_pure(false);
+        let right = MockNode::new().expect_pure(true);
+        let node = BinaryOpNode::new(Box::new(left), Box::new(right), BinaryOpType::ADD);
+
+        assert!(!node.pure());
+    }
+
+    #[test]
+    fn test_pure_right_is_false() {
+        let left = MockNode::new().expect_pure(true);
+        let right = MockNode::new().expect_pure(false);
+        let node = BinaryOpNode::new(Box::new(left), Box::new(right), BinaryOpType::ADD);
+
+        assert!(!node.pure());
+    }
+
+    #[test]
+    fn test_check_semantic_all_pure() {
+        let mut symtab = SymbolTable::new();
+        let left = MockNode::new().expect_pure(true);
+        let right = MockNode::new().expect_pure(true);
+        let node = BinaryOpNode::new(Box::new(left), Box::new(right), BinaryOpType::ADD);
+
+        let result = node.check_semantic(&mut symtab);
+
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_check_semantic_not_pure() {
+        let mut symtab = SymbolTable::new();
+        let left = MockNode::new().expect_pure(false).expect_check_semantic();
+        let right = MockNode::new().expect_pure(true);
+        let node = BinaryOpNode::new(Box::new(left), Box::new(right), BinaryOpType::ADD);
+
+        let result = node.check_semantic(&mut symtab);
+
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_check_semantic_err() {
+        let mut symtab = SymbolTable::new();
+        let left = MockNode::new()
+            .expect_pure(false)
+            .expect_check_semantic_err(InterpreterError::EOF);
+        let right = MockNode::new().expect_pure(false).expect_check_semantic();
+        let node = BinaryOpNode::new(Box::new(left), Box::new(right), BinaryOpType::ADD);
+
+        let result = node.check_semantic(&mut symtab);
+
+        assert!(result.is_err());
+    }
+}

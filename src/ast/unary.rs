@@ -41,7 +41,80 @@ impl ASTSemanticAnalysis for UnaryOpNode {
         if self.node.pure() {
             Ok(())
         } else {
-            self.check_semantic(symtab)
+            self.node.check_semantic(symtab)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::ast::tests::MockNode;
+    use crate::error::InterpreterError;
+    use crate::symbol_table::SymbolTable;
+
+    use super::{ASTExpression, ASTSemanticAnalysis, UnaryOpNode, UnaryOpType};
+
+    #[test]
+    fn test_eval_plus() {
+        let value: f64 = 32.;
+        let mut symtab = SymbolTable::new();
+        let inner = MockNode::new().expect_eval(value).expect_pure(true);
+        let node = UnaryOpNode::new(Box::new(inner), UnaryOpType::PLUS);
+        let result = node.eval(&mut symtab);
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), value);
+    }
+
+    #[test]
+    fn test_eval_minus() {
+        let value: f64 = 32.;
+        let mut symtab = SymbolTable::new();
+        let inner = MockNode::new().expect_eval(value).expect_pure(true);
+        let node = UnaryOpNode::new(Box::new(inner), UnaryOpType::MINUS);
+        let result = node.eval(&mut symtab);
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), -value);
+    }
+
+    #[test]
+    fn test_pure() {
+        let inner = MockNode::new().expect_pure(true);
+        let node = UnaryOpNode::new(Box::new(inner), UnaryOpType::PLUS);
+
+        assert!(node.pure());
+    }
+
+    #[test]
+    fn test_pure_is_false() {
+        let inner = MockNode::new().expect_pure(false);
+        let node = UnaryOpNode::new(Box::new(inner), UnaryOpType::PLUS);
+
+        assert!(!node.pure());
+    }
+
+    #[test]
+    fn test_check_semantic() {
+        let mut symtab = SymbolTable::new();
+        let inner = MockNode::new().expect_pure(true).expect_check_semantic();
+        let node = UnaryOpNode::new(Box::new(inner), UnaryOpType::PLUS);
+
+        let result = node.check_semantic(&mut symtab);
+
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_check_semantic_err() {
+        let mut symtab = SymbolTable::new();
+        let inner = MockNode::new()
+            .expect_pure(false)
+            .expect_check_semantic_err(InterpreterError::EOF);
+        let node = UnaryOpNode::new(Box::new(inner), UnaryOpType::PLUS);
+
+        let result = node.check_semantic(&mut symtab);
+
+        assert!(result.is_err());
     }
 }

@@ -25,7 +25,7 @@ fn main() -> io::Result<()> {
 
         match interpreter.interpret(&buffer) {
             Ok(value) => println!("{}", value),
-            Err(err) => println!("{:?}", err),
+            Err(err) => println!("{}", err),
         }
     }
 }
